@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>Wordle</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <main class="app">
+        <header class="topbar">
+            <button class="icon-btn" id="helpBtn" aria-label="How to play">?</button>
+            <h1>WORDLE</h1>
+            <button class="icon-btn" id="statsBtn" aria-label="Statistics">▥</button>
+        </header>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+        <section id="board" class="board" aria-label="Wordle board"></section>
+
+        <section id="keyboard" class="keyboard" aria-label="Keyboard"></section>
+
+        <div class="game-message" id="gameMessage" aria-live="polite"></div>
+    </main>
+
+    <div class="modal hidden" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <div class="modal-card">
+            <button class="close-btn" data-close="helpModal" aria-label="Close">×</button>
+            <h2 id="helpTitle">How to play</h2>
+            <p>Guess the five-letter word in six tries.</p>
+            <div class="example"><span class="example-tile green">W</span><span>W is in the word and in the correct spot.</span></div>
+            <div class="example"><span class="example-tile yellow">O</span><span>O is in the word but in the wrong spot.</span></div>
+            <div class="example"><span class="example-tile gray">R</span><span>R is not in the word.</span></div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+        <div class="modal-card stats-card">
+            <button class="close-btn" data-close="statsModal" aria-label="Close">×</button>
+            <h2 id="statsTitle">Statistics</h2>
+            <div class="stat-grid">
+                <div><strong id="played">0</strong><span>Played</span></div>
+                <div><strong id="winRate">0</strong><span>Win %</span></div>
+                <div><strong id="streak">0</strong><span>Streak</span></div>
+                <div><strong id="maxStreak">0</strong><span>Best</span></div>
+            </div>
+            <h3>Guess distribution</h3>
+            <div id="distribution" class="distribution"></div>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>
