@@ -30,19 +30,27 @@ const keyStates = {};
 
 
 // ==========================================
-// CREATE GAMES
+// CREATE GAMES DYNAMICALLY
 // ==========================================
 
 function createGames() {
 
     const games = {};
 
-    for (let i = 1; i <= GAMES_PER_DAY; i++) {
+    for (
+        let i = 1;
+        i <= GAMES_PER_DAY;
+        i++
+    ) {
 
         games[i] = {
+
             guesses: [],
+
             results: [],
+
             completed: false
+
         };
 
     }
@@ -95,9 +103,13 @@ function loadState() {
 
     try {
 
-        const saved = JSON.parse(
-            localStorage.getItem(STORAGE_KEY)
-        );
+        const saved =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEY
+                )
+            );
+
 
         if (
             saved &&
@@ -107,6 +119,7 @@ function loadState() {
             return saved;
 
         }
+
 
         return emptyState();
 
@@ -143,15 +156,25 @@ function todayKey() {
 
     const now = new Date();
 
-    const year = now.getFullYear();
+    const year =
+        now.getFullYear();
 
-    const month = String(
-        now.getMonth() + 1
-    ).padStart(2, "0");
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
 
-    const day = String(
-        now.getDate()
-    ).padStart(2, "0");
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
 
     return `${year}-${month}-${day}`;
 
@@ -170,8 +193,12 @@ async function getDailyIndex(
     const seed =
         `${day}-game-${gameNumber}`;
 
+
     const bytes =
-        new TextEncoder().encode(seed);
+        new TextEncoder().encode(
+            seed
+        );
+
 
     const hash =
         await crypto.subtle.digest(
@@ -179,8 +206,10 @@ async function getDailyIndex(
             bytes
         );
 
+
     const view =
         new DataView(hash);
+
 
     return (
         view.getUint32(0) %
@@ -193,10 +222,10 @@ async function getDailyIndex(
 // ==========================================
 // GET BLACK LETTER
 //
-// The letter:
-// 1. Is NOT in the answer
-// 2. Is deterministic
-// 3. Is different for different games
+// The black letter:
+// - Is NOT contained in the answer
+// - Is deterministic
+// - Can be different for each puzzle
 // ==========================================
 
 async function getBlackLetter(
@@ -208,19 +237,27 @@ async function getBlackLetter(
     const alphabet =
         "abcdefghijklmnopqrstuvwxyz";
 
+
     const possibleLetters =
         alphabet
             .split("")
             .filter(
                 letter =>
-                    !answer.includes(letter)
+                    !answer.includes(
+                        letter
+                    )
             );
+
 
     const seed =
         `${day}-black-${gameNumber}`;
 
+
     const bytes =
-        new TextEncoder().encode(seed);
+        new TextEncoder().encode(
+            seed
+        );
+
 
     const hash =
         await crypto.subtle.digest(
@@ -228,12 +265,15 @@ async function getBlackLetter(
             bytes
         );
 
+
     const view =
         new DataView(hash);
+
 
     const index =
         view.getUint32(0) %
         possibleLetters.length;
+
 
     return possibleLetters[index];
 
@@ -241,7 +281,7 @@ async function getBlackLetter(
 
 
 // ==========================================
-// INITIALIZE GAME
+// INITIALIZE
 // ==========================================
 
 async function init() {
@@ -249,6 +289,7 @@ async function init() {
     createBoard();
 
     createKeyboard();
+
 
     try {
 
@@ -332,6 +373,17 @@ async function init() {
                 );
 
 
+        if (
+            answerWords.length === 0
+        ) {
+
+            throw new Error(
+                "No answer words found"
+            );
+
+        }
+
+
         const today =
             todayKey();
 
@@ -366,11 +418,14 @@ async function init() {
 
             state = {
 
-                day: today,
+                day:
+                    today,
 
-                currentGame: 1,
+                currentGame:
+                    1,
 
-                games: createGames(),
+                games:
+                    createGames(),
 
                 ...stats
 
@@ -387,12 +442,15 @@ async function init() {
         // ==========================================
 
         if (
-            Object.keys(state.games).length !==
+            Object.keys(
+                state.games
+            ).length !==
             GAMES_PER_DAY
         ) {
 
             const oldGames =
                 state.games;
+
 
             state.games =
                 createGames();
@@ -404,7 +462,9 @@ async function init() {
                 i++
             ) {
 
-                if (oldGames[i]) {
+                if (
+                    oldGames[i]
+                ) {
 
                     state.games[i] =
                         oldGames[i];
@@ -465,7 +525,7 @@ async function loadCurrentGame() {
 
 
     // ==========================================
-    // RESET KEYBOARD STATES
+    // RESET KEYBOARD
     // ==========================================
 
     for (
@@ -494,7 +554,7 @@ async function loadCurrentGame() {
 
 
     // ==========================================
-    // CREATE FRESH BOARD
+    // FRESH BOARD
     // ==========================================
 
     createBoard();
@@ -502,6 +562,7 @@ async function loadCurrentGame() {
 
     const day =
         todayKey();
+
 
     const gameNumber =
         state.currentGame;
@@ -534,21 +595,30 @@ async function loadCurrentGame() {
         );
 
 
+    // ==========================================
+    // DEVELOPMENT ONLY
+    //
+    // Remove this console.log before
+    // publishing the final version.
+    // ==========================================
+
     console.log(
-        `Puzzle ${gameNumber}:`,
-        "Answer:",
+        `Puzzle ${gameNumber}`,
+        "| Answer:",
         answer,
-        "Black letter:",
+        "| Black letter:",
         blackLetter
     );
 
 
     const game =
-        state.games[gameNumber];
+        state.games[
+            gameNumber
+        ];
 
 
     // ==========================================
-    // RESTORE PREVIOUS GAME
+    // RESTORE GAME
     // ==========================================
 
     restoreGame(game);
@@ -568,7 +638,9 @@ async function loadCurrentGame() {
 
     }
 
-    else if (game.completed) {
+    else if (
+        game.completed
+    ) {
 
         gameMessage.textContent =
             `Puzzle ${gameNumber} completed.`;
@@ -593,6 +665,7 @@ function createBoard() {
 
     board.innerHTML = "";
 
+
     for (
         let i = 0;
         i < ROWS * COLS;
@@ -600,12 +673,18 @@ function createBoard() {
     ) {
 
         const tile =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
+
 
         tile.className =
             "tile";
 
-        board.appendChild(tile);
+
+        board.appendChild(
+            tile
+        );
 
     }
 
@@ -620,10 +699,15 @@ function createKeyboard() {
 
     keyboard.innerHTML = "";
 
+
     const rows = [
+
         "QWERTYUIOP",
+
         "ASDFGHJKL",
+
         "ZXCVBNM"
+
     ];
 
 
@@ -634,7 +718,10 @@ function createKeyboard() {
         ) => {
 
             const rowDiv =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             rowDiv.className =
                 "keyboard-row";
@@ -700,19 +787,30 @@ function addKey(
 ) {
 
     const key =
-        document.createElement("button");
+        document.createElement(
+            "button"
+        );
+
 
     key.className =
-        `key${wide ? " wide" : ""}`;
+        `key${
+            wide
+                ? " wide"
+                : ""
+        }`;
+
 
     key.textContent =
         label;
 
+
     key.dataset.key =
         label;
 
+
     key.setAttribute(
         "aria-label",
+
         label === "⌫"
             ? "Backspace"
             : label
@@ -721,6 +819,7 @@ function addKey(
 
     key.addEventListener(
         "click",
+
         () =>
             handleKey(label)
     );
@@ -792,7 +891,8 @@ function addLetter(letter) {
 
     const tile =
         board.children[
-            currentRow * COLS +
+            currentRow *
+            COLS +
             currentTile
         ];
 
@@ -809,7 +909,9 @@ function addLetter(letter) {
 
     setTimeout(
         () =>
-            tile.classList.remove("pop"),
+            tile.classList.remove(
+                "pop"
+            ),
         120
     );
 
@@ -839,12 +941,15 @@ function removeLetter() {
 
     const tile =
         board.children[
-            currentRow * COLS +
+            currentRow *
+            COLS +
             currentTile
         ];
 
 
-    tile.textContent = "";
+    tile.textContent =
+        "";
+
 
     tile.classList.remove(
         "filled"
@@ -854,12 +959,13 @@ function removeLetter() {
 
 
 // ==========================================
-// GET CURRENT GUESS
+// CURRENT GUESS
 // ==========================================
 
 function currentGuess() {
 
     let guess = "";
+
 
     for (
         let i = 0;
@@ -869,11 +975,13 @@ function currentGuess() {
 
         guess +=
             board.children[
-                currentRow * COLS +
+                currentRow *
+                COLS +
                 i
             ].textContent;
 
     }
+
 
     return guess.toLowerCase();
 
@@ -881,10 +989,12 @@ function currentGuess() {
 
 
 // ==========================================
-// CHECK BLACK LETTER
+// BLACK LETTER CHECK
 // ==========================================
 
-function containsBlackLetter(guess) {
+function containsBlackLetter(
+    guess
+) {
 
     return guess.includes(
         blackLetter
@@ -937,7 +1047,9 @@ async function submitGuess() {
     // ==========================================
 
     if (
-        game.guesses.includes(guess)
+        game.guesses.includes(
+            guess
+        )
     ) {
 
         showToast(
@@ -954,8 +1066,12 @@ async function submitGuess() {
     // ==========================================
 
     if (
-        !allowedWords.has(guess) &&
-        !answerWords.includes(guess)
+        !allowedWords.has(
+            guess
+        ) &&
+        !answerWords.includes(
+            guess
+        )
     ) {
 
         showToast(
@@ -971,43 +1087,53 @@ async function submitGuess() {
 
 
     // ==========================================
-    // BLACK LETTER
+    // BLACK LETTER PENALTY
     // ==========================================
 
     if (
-        containsBlackLetter(guess)
+        containsBlackLetter(
+            guess
+        )
     ) {
 
+        // Save the guess
         game.guesses.push(
             guess
         );
 
+
+        // Save black result
         game.results.push([
+
             "black",
             "black",
             "black",
             "black",
             "black"
+
         ]);
 
 
         saveState();
 
 
+        // Reveal the black row
         await revealBlackRow();
 
 
+        // Tell player exactly what happened
         showToast(
-            `BLACK LETTER: ${blackLetter.toUpperCase()}`
+            "BLACK LETTER! -1 GUESS"
         );
 
 
         // ==========================================
-        // GUESS IS CONSUMED
+        // LAST ROW
         // ==========================================
 
         if (
-            currentRow === ROWS - 1
+            currentRow ===
+            ROWS - 1
         ) {
 
             finishGame(
@@ -1017,14 +1143,20 @@ async function submitGuess() {
 
         }
 
+
+        // ==========================================
+        // MOVE TO NEXT ROW
+        // ==========================================
+
         else {
 
             currentRow++;
 
             currentTile = 0;
 
+
             gameMessage.textContent =
-                `Puzzle ${state.currentGame} of ${GAMES_PER_DAY}`;
+                `Black letter! You lost a guess. Puzzle ${state.currentGame} of ${GAMES_PER_DAY}`;
 
         }
 
@@ -1092,7 +1224,8 @@ async function submitGuess() {
     // ==========================================
 
     else if (
-        currentRow === ROWS - 1
+        currentRow ===
+        ROWS - 1
     ) {
 
         finishGame(
@@ -1131,11 +1264,13 @@ function scoreGuess(
 ) {
 
     const result = [
+
         "gray",
         "gray",
         "gray",
         "gray",
         "gray"
+
     ];
 
 
@@ -1143,7 +1278,9 @@ function scoreGuess(
         target.split("");
 
 
-    // GREEN FIRST
+    // ==========================================
+    // GREEN
+    // ==========================================
 
     for (
         let i = 0;
@@ -1159,6 +1296,7 @@ function scoreGuess(
             result[i] =
                 "green";
 
+
             remaining[i] =
                 null;
 
@@ -1167,7 +1305,9 @@ function scoreGuess(
     }
 
 
-    // YELLOW SECOND
+    // ==========================================
+    // YELLOW
+    // ==========================================
 
     for (
         let i = 0;
@@ -1176,7 +1316,8 @@ function scoreGuess(
     ) {
 
         if (
-            result[i] === "green"
+            result[i] ===
+            "green"
         ) {
 
             continue;
@@ -1197,6 +1338,7 @@ function scoreGuess(
             result[i] =
                 "yellow";
 
+
             remaining[index] =
                 null;
 
@@ -1214,10 +1356,13 @@ function scoreGuess(
 // REVEAL NORMAL ROW
 // ==========================================
 
-async function revealRow(result) {
+async function revealRow(
+    result
+) {
 
     const start =
-        currentRow * COLS;
+        currentRow *
+        COLS;
 
 
     for (
@@ -1276,7 +1421,8 @@ async function revealRow(result) {
 async function revealBlackRow() {
 
     const start =
-        currentRow * COLS;
+        currentRow *
+        COLS;
 
 
     for (
@@ -1366,7 +1512,9 @@ function updateKeyboard(
             !keyStates[letter] ||
 
             priority[next] >
-            priority[keyStates[letter]]
+            priority[
+                keyStates[letter]
+            ]
         ) {
 
             keyStates[letter] =
@@ -1388,6 +1536,7 @@ function updateKeyboard(
                     "black"
                 );
 
+
                 key.classList.add(
                     next
                 );
@@ -1405,7 +1554,9 @@ function updateKeyboard(
 // RESTORE GAME
 // ==========================================
 
-function restoreGame(game) {
+function restoreGame(
+    game
+) {
 
     game.guesses.forEach(
         (
@@ -1425,12 +1576,15 @@ function restoreGame(game) {
 
                 const tile =
                     board.children[
-                        row * COLS + i
+                        row *
+                        COLS +
+                        i
                     ];
 
 
                 tile.textContent =
-                    guess[i].toUpperCase();
+                    guess[i]
+                        .toUpperCase();
 
 
                 tile.classList.add(
@@ -1441,12 +1595,13 @@ function restoreGame(game) {
             }
 
 
-            // Don't color keyboard
-            // black for the special
-            // black-letter guess.
+            // Don't change keyboard
+            // to black because black is
+            // a penalty, not a letter state.
 
             if (
-                result[0] !== "black"
+                result[0] !==
+                "black"
             ) {
 
                 updateKeyboard(
@@ -1477,13 +1632,14 @@ function restoreGame(game) {
 
     const solved =
         lastResult.every(
-            x =>
-                x === "green"
+            result =>
+                result === "green"
         );
 
 
     const usedAllRows =
-        game.guesses.length >= ROWS;
+        game.guesses.length >=
+        ROWS;
 
 
     if (
@@ -1510,6 +1666,7 @@ function restoreGame(game) {
 
         currentRow =
             game.guesses.length;
+
 
         currentTile =
             0;
@@ -1548,7 +1705,9 @@ function finishGame(
 
         state.wins++;
 
+
         state.streak++;
+
 
         state.maxStreak =
             Math.max(
@@ -1586,7 +1745,7 @@ function finishGame(
 
 
     // ==========================================
-    // NEXT PUZZLE
+    // LOAD NEXT PUZZLE
     // ==========================================
 
     if (
@@ -1636,7 +1795,9 @@ function finishGame(
 // TOAST
 // ==========================================
 
-function showToast(message) {
+function showToast(
+    message
+) {
 
     toast.textContent =
         message;
@@ -1671,13 +1832,17 @@ function showToast(message) {
 function updateStatsModal() {
 
     document
-        .getElementById("played")
+        .getElementById(
+            "played"
+        )
         .textContent =
             state.played;
 
 
     document
-        .getElementById("winRate")
+        .getElementById(
+            "winRate"
+        )
         .textContent =
             state.played
 
@@ -1691,13 +1856,17 @@ function updateStatsModal() {
 
 
     document
-        .getElementById("streak")
+        .getElementById(
+            "streak"
+        )
         .textContent =
             state.streak;
 
 
     document
-        .getElementById("maxStreak")
+        .getElementById(
+            "maxStreak"
+        )
         .textContent =
             state.maxStreak;
 
@@ -1736,6 +1905,7 @@ function updateStatsModal() {
 
 
             row.innerHTML = `
+
                 <span>
                     ${i + 1}
                 </span>
@@ -1746,12 +1916,15 @@ function updateStatsModal() {
                         width:
                         ${Math.max(
                             8,
-                            count / max * 100
+                            count /
+                            max *
+                            100
                         )}%
                     "
                 >
                     ${count}
                 </div>
+
             `;
 
 
@@ -1792,25 +1965,35 @@ function closeModal(id) {
 
 
 document
-    .getElementById("helpBtn")
+    .getElementById(
+        "helpBtn"
+    )
     .addEventListener(
         "click",
         () =>
-            openModal("helpModal")
+            openModal(
+                "helpModal"
+            )
     );
 
 
 document
-    .getElementById("statsBtn")
+    .getElementById(
+        "statsBtn"
+    )
     .addEventListener(
         "click",
         () =>
-            openModal("statsModal")
+            openModal(
+                "statsModal"
+            )
     );
 
 
 document
-    .querySelectorAll("[data-close]")
+    .querySelectorAll(
+        "[data-close]"
+    )
     .forEach(
         btn =>
             btn.addEventListener(
@@ -1824,7 +2007,9 @@ document
 
 
 document
-    .querySelectorAll(".modal")
+    .querySelectorAll(
+        ".modal"
+    )
     .forEach(
         modal =>
             modal.addEventListener(
@@ -1832,7 +2017,8 @@ document
                 event => {
 
                     if (
-                        event.target === modal
+                        event.target ===
+                        modal
                     ) {
 
                         modal.classList.add(
@@ -1870,22 +2056,28 @@ document.addEventListener(
 
 
         if (
-            event.key === "Backspace"
+            event.key ===
+            "Backspace"
         ) {
 
             event.preventDefault();
 
-            handleKey("⌫");
+            handleKey(
+                "⌫"
+            );
 
         }
 
         else if (
-            event.key === "Enter"
+            event.key ===
+            "Enter"
         ) {
 
             event.preventDefault();
 
-            handleKey("ENTER");
+            handleKey(
+                "ENTER"
+            );
 
         }
 
@@ -1893,7 +2085,9 @@ document.addEventListener(
             /^[A-Z]$/.test(key)
         ) {
 
-            handleKey(key);
+            handleKey(
+                key
+            );
 
         }
 
@@ -1902,7 +2096,7 @@ document.addEventListener(
 
 
 // ==========================================
-// START
+// START GAME
 // ==========================================
 
 init();
