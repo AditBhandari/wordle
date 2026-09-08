@@ -3,12 +3,20 @@
     --muted: #787c7e;
     --border: #d3d6da;
     --key: #d3d6da;
+
     --green: #6aaa64;
     --yellow: #c9b458;
     --gray: #787c7e;
+    --black: #000000;
+
     --surface: #ffffff;
     --overlay: rgba(0, 0, 0, .42);
 }
+
+
+/* ==========================================
+   GLOBAL
+   ========================================== */
 
 * {
     box-sizing: border-box;
@@ -23,8 +31,14 @@ body {
     margin: 0;
     background: var(--surface);
     color: var(--text);
-    font-family: Arial, Helvetica, sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
     -webkit-tap-highlight-color: transparent;
+
     overscroll-behavior: none;
 }
 
@@ -33,13 +47,15 @@ button {
 }
 
 
-/* =========================
-   MAIN APP
-========================= */
+/* ==========================================
+   APP
+   ========================================== */
 
 .app {
     width: min(100%, 560px);
+
     min-height: 100dvh;
+
     margin: 0 auto;
 
     padding:
@@ -52,16 +68,21 @@ button {
 }
 
 
-/* =========================
+/* ==========================================
    TOP BAR
-========================= */
+   ========================================== */
 
 .topbar {
     height: 58px;
+
     border-bottom: 1px solid #e5e5e5;
 
     display: grid;
-    grid-template-columns: 44px 1fr 44px;
+
+    grid-template-columns:
+        44px
+        1fr
+        44px;
 
     align-items: center;
 
@@ -80,6 +101,11 @@ button {
     font-weight: 800;
 }
 
+
+/* ==========================================
+   ICON BUTTONS
+   ========================================== */
+
 .icon-btn {
     width: 38px;
     height: 38px;
@@ -97,20 +123,21 @@ button {
     font-size: 20px;
 }
 
-.icon-btn:active,
-.key:active {
+.icon-btn:active {
     transform: scale(.96);
 }
 
 
-/* =========================
-   GAME BOARD
-========================= */
+/* ==========================================
+   BOARD
+   ========================================== */
 
 .board {
     width: min(350px, 88vw);
 
-    margin: 18px auto 12px;
+    margin:
+        18px auto
+        12px;
 
     display: grid;
 
@@ -123,9 +150,7 @@ button {
 .tile {
     aspect-ratio: 1;
 
-    border:
-        2px solid
-        var(--border);
+    border: 2px solid var(--border);
 
     display: flex;
 
@@ -151,10 +176,18 @@ button {
     border-color: #878a8c;
 }
 
+
+/* ==========================================
+   TILE COLORS
+   ========================================== */
+
 .tile.green,
 .tile.yellow,
-.tile.gray {
-    color: #fff;
+.tile.gray,
+.tile.black {
+
+    color: #ffffff;
+
     border-color: transparent;
 }
 
@@ -170,10 +203,14 @@ button {
     background: var(--gray);
 }
 
+.tile.black {
+    background: var(--black);
+}
 
-/* =========================
-   ANIMATIONS
-========================= */
+
+/* ==========================================
+   TILE POP ANIMATION
+   ========================================== */
 
 @keyframes pop {
 
@@ -197,6 +234,10 @@ button {
 }
 
 
+/* ==========================================
+   TILE FLIP ANIMATION
+   ========================================== */
+
 @keyframes flip {
 
     0% {
@@ -219,18 +260,23 @@ button {
 }
 
 
-/* =========================
-   KEYBOARD - FIXED
-========================= */
+/* ==========================================
+   KEYBOARD
+   ========================================== */
 
 .keyboard {
 
     width: min(500px, 100%);
 
     margin:
-        auto auto 12px;
+        auto
+        auto
+        12px;
 
-    padding: 0 4px;
+    padding:
+        0
+        0
+        4px;
 
     display: flex;
 
@@ -242,7 +288,9 @@ button {
 }
 
 
-/* EACH KEYBOARD ROW */
+/* ==========================================
+   KEYBOARD ROW
+   ========================================== */
 
 .keyboard-row {
 
@@ -252,19 +300,25 @@ button {
 
     justify-content: center;
 
-    gap: 5px;
+    align-items: center;
+
+    gap: 6px;
 }
 
 
-/* INDIVIDUAL KEY */
+/* ==========================================
+   KEYS
+   ========================================== */
 
 .key {
 
-    flex: 1;
+    flex: 1 1 0;
 
     min-width: 0;
 
     height: 54px;
+
+    padding: 0;
 
     border: 0;
 
@@ -292,40 +346,74 @@ button {
 }
 
 
-/* ENTER + BACKSPACE */
+/* ==========================================
+   WIDE KEYS
+   ========================================== */
 
 .key.wide {
 
-    flex: 1.5;
+    flex: 1.5 1 0;
 
-    font-size: 11px;
+    font-size: 12px;
 }
 
 
-/* KEY COLORS */
+/* ==========================================
+   KEY ACTIVE
+   ========================================== */
+
+.key:active {
+
+    transform: scale(.96);
+
+}
+
+
+/* ==========================================
+   KEY COLORS
+   ========================================== */
 
 .key.green,
 .key.yellow,
-.key.gray {
-    color: #fff;
+.key.gray,
+.key.black {
+
+    color: #ffffff;
+
 }
 
 .key.green {
-    background: var(--green);
+
+    background:
+        var(--green);
+
 }
 
 .key.yellow {
-    background: var(--yellow);
+
+    background:
+        var(--yellow);
+
 }
 
 .key.gray {
-    background: var(--gray);
+
+    background:
+        var(--gray);
+
+}
+
+.key.black {
+
+    background:
+        var(--black);
+
 }
 
 
-/* =========================
+/* ==========================================
    GAME MESSAGE
-========================= */
+   ========================================== */
 
 .game-message {
 
@@ -336,12 +424,13 @@ button {
     font-weight: 700;
 
     margin-bottom: 10px;
+
 }
 
 
-/* =========================
+/* ==========================================
    TOAST
-========================= */
+   ========================================== */
 
 .toast {
 
@@ -354,14 +443,18 @@ button {
     top: 72px;
 
     transform:
-        translate(-50%, -10px);
+        translate(
+            -50%,
+            -10px
+        );
 
     background: #1a1a1b;
 
     color: white;
 
     padding:
-        10px 14px;
+        10px
+        14px;
 
     border-radius: 5px;
 
@@ -381,13 +474,17 @@ button {
     opacity: 1;
 
     transform:
-        translate(-50%, 0);
+        translate(
+            -50%,
+            0
+        );
+
 }
 
 
-/* =========================
+/* ==========================================
    MODALS
-========================= */
+   ========================================== */
 
 .modal {
 
@@ -407,18 +504,29 @@ button {
     justify-content: center;
 
     padding: 18px;
+
 }
 
 .modal.hidden {
+
     display: none;
+
 }
+
+
+/* ==========================================
+   MODAL CARD
+   ========================================== */
 
 .modal-card {
 
     position: relative;
 
     width:
-        min(430px, 100%);
+        min(
+            430px,
+            100%
+        );
 
     max-height: 90dvh;
 
@@ -432,12 +540,20 @@ button {
 
     box-shadow:
         0 12px 40px
-        rgba(0,0,0,.2);
+        rgba(0, 0, 0, .2);
+
 }
 
 .modal-card h2 {
+
     margin-top: 0;
+
 }
+
+
+/* ==========================================
+   CLOSE BUTTON
+   ========================================== */
 
 .close-btn {
 
@@ -454,12 +570,13 @@ button {
     font-size: 30px;
 
     cursor: pointer;
+
 }
 
 
-/* =========================
+/* ==========================================
    HELP EXAMPLES
-========================= */
+   ========================================== */
 
 .example {
 
@@ -472,6 +589,7 @@ button {
     margin: 12px 0;
 
     line-height: 1.35;
+
 }
 
 .example-tile {
@@ -480,7 +598,8 @@ button {
 
     height: 42px;
 
-    flex: 0 0 42px;
+    flex:
+        0 0 42px;
 
     display: grid;
 
@@ -489,24 +608,41 @@ button {
     color: white;
 
     font-weight: 800;
+
 }
 
 .example-tile.green {
-    background: var(--green);
+
+    background:
+        var(--green);
+
 }
 
 .example-tile.yellow {
-    background: var(--yellow);
+
+    background:
+        var(--yellow);
+
 }
 
 .example-tile.gray {
-    background: var(--gray);
+
+    background:
+        var(--gray);
+
+}
+
+.example-tile.black {
+
+    background:
+        var(--black);
+
 }
 
 
-/* =========================
+/* ==========================================
    STATISTICS
-========================= */
+   ========================================== */
 
 .stat-grid {
 
@@ -520,29 +656,42 @@ button {
     gap: 8px;
 
     margin: 20px 0;
+
 }
 
 .stat-grid strong,
 .stat-grid span {
+
     display: block;
+
 }
 
 .stat-grid strong {
+
     font-size: 30px;
+
 }
 
 .stat-grid span {
 
     font-size: 12px;
 
-    color: var(--muted);
+    color:
+        var(--muted);
+
 }
+
+
+/* ==========================================
+   DISTRIBUTION
+   ========================================== */
 
 .distribution {
 
     display: grid;
 
     gap: 4px;
+
 }
 
 .dist-row {
@@ -550,11 +699,13 @@ button {
     display: grid;
 
     grid-template-columns:
-        18px 1fr;
+        18px
+        1fr;
 
     gap: 5px;
 
     align-items: center;
+
 }
 
 .dist-bar {
@@ -563,9 +714,11 @@ button {
 
     height: 20px;
 
-    padding: 0 7px;
+    padding:
+        0 7px;
 
-    background: var(--gray);
+    background:
+        var(--gray);
 
     color: white;
 
@@ -578,12 +731,48 @@ button {
     font-size: 12px;
 
     font-weight: 800;
+
 }
 
 
-/* =========================
-   MOBILE
-========================= */
+/* ==========================================
+   TABLET / SMALL DESKTOP
+   ========================================== */
+
+@media (max-width: 500px) {
+
+    .keyboard {
+
+        width: 100%;
+
+    }
+
+    .keyboard-row {
+
+        gap: 5px;
+
+    }
+
+    .key {
+
+        height: 52px;
+
+        font-size: 13px;
+
+    }
+
+    .key.wide {
+
+        font-size: 11px;
+
+    }
+
+}
+
+
+/* ==========================================
+   PHONE
+   ========================================== */
 
 @media (max-width: 430px) {
 
@@ -597,42 +786,72 @@ button {
 
 
     .topbar {
+
         height: 54px;
+
+        grid-template-columns:
+            40px
+            1fr
+            40px;
+
     }
 
 
     .topbar h1 {
+
         font-size: 26px;
+
     }
 
 
     .board {
 
         width:
-            min(330px, 88vw);
+            min(
+                330px,
+                88vw
+            );
 
         margin-top: 14px;
 
     }
 
 
+    .keyboard {
+
+        width: 100%;
+
+        gap: 5px;
+
+    }
+
+
     .keyboard-row {
-        gap: 3px;
+
+        width: 100%;
+
+        gap: 4px;
+
     }
 
 
     .key {
 
+        flex: 1 1 0;
+
         height: 52px;
 
         font-size: 13px;
+
+        border-radius: 4px;
 
     }
 
 
     .key.wide {
 
-        flex: 1.4;
+        flex:
+            1.5 1 0;
 
         font-size: 10px;
 
@@ -641,21 +860,94 @@ button {
 }
 
 
+/* ==========================================
+   SMALL PHONES
+   ========================================== */
+
 @media (max-width: 360px) {
 
+    .app {
+
+        padding-left: 5px;
+
+        padding-right: 5px;
+
+    }
+
+
     .board {
+
         width: 94vw;
+
+    }
+
+
+    .keyboard {
+
+        gap: 4px;
+
     }
 
 
     .keyboard-row {
-        gap: 2px;
+
+        gap: 3px;
+
     }
 
 
     .key {
 
         height: 48px;
+
+        font-size: 12px;
+
+    }
+
+
+    .key.wide {
+
+        font-size: 9px;
+
+    }
+
+}
+
+
+/* ==========================================
+   VERY SMALL PHONES
+   ========================================== */
+
+@media (max-width: 320px) {
+
+    .topbar h1 {
+
+        font-size: 23px;
+
+        letter-spacing: 1px;
+
+    }
+
+
+    .board {
+
+        width: 95vw;
+
+        gap: 4px;
+
+    }
+
+
+    .keyboard-row {
+
+        gap: 2px;
+
+    }
+
+
+    .key {
+
+        height: 44px;
 
         font-size: 11px;
 
@@ -664,9 +956,7 @@ button {
 
     .key.wide {
 
-        flex: 1.35;
-
-        font-size: 9px;
+        font-size: 8px;
 
     }
 
