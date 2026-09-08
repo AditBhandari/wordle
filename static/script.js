@@ -12,13 +12,17 @@ const COLS = 5;
 
 const GAMES_PER_DAY = 3;
 
-const STORAGE_KEY = "wordle-clone-static-v3";
+const STORAGE_KEY = "wordle-clone-static-v4";
 
 let allowedWords = new Set();
 let answerWords = [];
+
 let answer = "";
+let blackLetter = "";
+
 let currentRow = 0;
 let currentTile = 0;
+
 let gameOver = false;
 let submitting = false;
 
@@ -26,18 +30,14 @@ const keyStates = {};
 
 
 // ==========================================
-// CREATE GAMES DYNAMICALLY
+// CREATE GAMES
 // ==========================================
 
 function createGames() {
 
     const games = {};
 
-    for (
-        let i = 1;
-        i <= GAMES_PER_DAY;
-        i++
-    ) {
+    for (let i = 1; i <= GAMES_PER_DAY; i++) {
 
         games[i] = {
             guesses: [],
@@ -96,11 +96,8 @@ function loadState() {
     try {
 
         const saved = JSON.parse(
-            localStorage.getItem(
-                STORAGE_KEY
-            )
+            localStorage.getItem(STORAGE_KEY)
         );
-
 
         if (
             saved &&
@@ -110,7 +107,6 @@ function loadState() {
             return saved;
 
         }
-
 
         return emptyState();
 
@@ -147,25 +143,15 @@ function todayKey() {
 
     const now = new Date();
 
-    const year =
-        now.getFullYear();
+    const year = now.getFullYear();
 
-    const month =
-        String(
-            now.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
+    const month = String(
+        now.getMonth() + 1
+    ).padStart(2, "0");
 
-    const day =
-        String(
-            now.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
-
+    const day = String(
+        now.getDate()
+    ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 
@@ -173,7 +159,7 @@ function todayKey() {
 
 
 // ==========================================
-// GET WORD FOR EACH GAME
+// GET DAILY WORD INDEX
 // ==========================================
 
 async function getDailyIndex(
@@ -184,12 +170,8 @@ async function getDailyIndex(
     const seed =
         `${day}-game-${gameNumber}`;
 
-
     const bytes =
-        new TextEncoder().encode(
-            seed
-        );
-
+        new TextEncoder().encode(seed);
 
     const hash =
         await crypto.subtle.digest(
@@ -197,15 +179,63 @@ async function getDailyIndex(
             bytes
         );
 
-
     const view =
         new DataView(hash);
-
 
     return (
         view.getUint32(0) %
         answerWords.length
     );
+
+}
+
+
+// ==========================================
+// GET BLACK LETTER
+//
+// The letter:
+// 1. Is NOT in the answer
+// 2. Is deterministic
+// 3. Is different for different games
+// ==========================================
+
+async function getBlackLetter(
+    day,
+    gameNumber,
+    answer
+) {
+
+    const alphabet =
+        "abcdefghijklmnopqrstuvwxyz";
+
+    const possibleLetters =
+        alphabet
+            .split("")
+            .filter(
+                letter =>
+                    !answer.includes(letter)
+            );
+
+    const seed =
+        `${day}-black-${gameNumber}`;
+
+    const bytes =
+        new TextEncoder().encode(seed);
+
+    const hash =
+        await crypto.subtle.digest(
+            "SHA-256",
+            bytes
+        );
+
+    const view =
+        new DataView(hash);
+
+    const index =
+        view.getUint32(0) %
+        possibleLetters.length;
+
+    return possibleLetters[index];
 
 }
 
@@ -219,7 +249,6 @@ async function init() {
     createBoard();
 
     createKeyboard();
-
 
     try {
 
@@ -337,14 +366,11 @@ async function init() {
 
             state = {
 
-                day:
-                    today,
+                day: today,
 
-                currentGame:
-                    1,
+                currentGame: 1,
 
-                games:
-                    createGames(),
+                games: createGames(),
 
                 ...stats
 
@@ -361,30 +387,24 @@ async function init() {
         // ==========================================
 
         if (
-            Object.keys(
-                state.games
-            ).length !==
+            Object.keys(state.games).length !==
             GAMES_PER_DAY
         ) {
 
             const oldGames =
                 state.games;
 
-
             state.games =
                 createGames();
 
 
-            // Keep previous game data
             for (
                 let i = 1;
                 i <= GAMES_PER_DAY;
                 i++
             ) {
 
-                if (
-                    oldGames[i]
-                ) {
+                if (oldGames[i]) {
 
                     state.games[i] =
                         oldGames[i];
@@ -393,9 +413,6 @@ async function init() {
 
             }
 
-
-            // Make sure current game
-            // does not go above the limit
 
             if (
                 state.currentGame >
@@ -444,8 +461,12 @@ async function loadCurrentGame() {
 
     gameOver = false;
 
+    submitting = false;
 
-    // Clear keyboard states
+
+    // ==========================================
+    // RESET KEYBOARD STATES
+    // ==========================================
 
     for (
         const key in keyStates
@@ -456,8 +477,6 @@ async function loadCurrentGame() {
     }
 
 
-    // Clear keyboard colors
-
     document
         .querySelectorAll(".key")
         .forEach(
@@ -466,14 +485,17 @@ async function loadCurrentGame() {
                 key.classList.remove(
                     "green",
                     "yellow",
-                    "gray"
+                    "gray",
+                    "black"
                 );
 
             }
         );
 
 
-    // Create fresh board
+    // ==========================================
+    // CREATE FRESH BOARD
+    // ==========================================
 
     createBoard();
 
@@ -481,10 +503,13 @@ async function loadCurrentGame() {
     const day =
         todayKey();
 
-
     const gameNumber =
         state.currentGame;
 
+
+    // ==========================================
+    // GET ANSWER
+    // ==========================================
 
     const index =
         await getDailyIndex(
@@ -497,29 +522,56 @@ async function loadCurrentGame() {
         answerWords[index];
 
 
+    // ==========================================
+    // GET BLACK LETTER
+    // ==========================================
+
+    blackLetter =
+        await getBlackLetter(
+            day,
+            gameNumber,
+            answer
+        );
+
+
+    console.log(
+        `Puzzle ${gameNumber}:`,
+        "Answer:",
+        answer,
+        "Black letter:",
+        blackLetter
+    );
+
+
     const game =
-        state.games[
-            gameNumber
-        ];
+        state.games[gameNumber];
 
 
-    // Restore game
+    // ==========================================
+    // RESTORE PREVIOUS GAME
+    // ==========================================
 
     restoreGame(game);
 
 
     // ==========================================
-    // UPDATE MESSAGE
+    // MESSAGE
     // ==========================================
 
     if (
         game.completed &&
-        gameNumber ===
-        GAMES_PER_DAY
+        gameNumber === GAMES_PER_DAY
     ) {
 
         gameMessage.textContent =
             `You completed all ${GAMES_PER_DAY} Wordles today!`;
+
+    }
+
+    else if (game.completed) {
+
+        gameMessage.textContent =
+            `Puzzle ${gameNumber} completed.`;
 
     }
 
@@ -541,7 +593,6 @@ function createBoard() {
 
     board.innerHTML = "";
 
-
     for (
         let i = 0;
         i < ROWS * COLS;
@@ -549,18 +600,12 @@ function createBoard() {
     ) {
 
         const tile =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         tile.className =
             "tile";
 
-
-        board.appendChild(
-            tile
-        );
+        board.appendChild(tile);
 
     }
 
@@ -575,15 +620,10 @@ function createKeyboard() {
 
     keyboard.innerHTML = "";
 
-
     const rows = [
-
         "QWERTYUIOP",
-
         "ASDFGHJKL",
-
         "ZXCVBNM"
-
     ];
 
 
@@ -594,10 +634,7 @@ function createKeyboard() {
         ) => {
 
             const rowDiv =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             rowDiv.className =
                 "keyboard-row";
@@ -663,30 +700,19 @@ function addKey(
 ) {
 
     const key =
-        document.createElement(
-            "button"
-        );
-
+        document.createElement("button");
 
     key.className =
-        `key${
-            wide
-                ? " wide"
-                : ""
-        }`;
-
+        `key${wide ? " wide" : ""}`;
 
     key.textContent =
         label;
 
-
     key.dataset.key =
         label;
 
-
     key.setAttribute(
         "aria-label",
-
         label === "⌫"
             ? "Backspace"
             : label
@@ -695,7 +721,6 @@ function addKey(
 
     key.addEventListener(
         "click",
-
         () =>
             handleKey(label)
     );
@@ -757,8 +782,7 @@ function handleKey(key) {
 function addLetter(letter) {
 
     if (
-        currentTile >=
-        COLS
+        currentTile >= COLS
     ) {
 
         return;
@@ -768,8 +792,7 @@ function addLetter(letter) {
 
     const tile =
         board.children[
-            currentRow *
-            COLS +
+            currentRow * COLS +
             currentTile
         ];
 
@@ -786,10 +809,7 @@ function addLetter(letter) {
 
     setTimeout(
         () =>
-            tile.classList.remove(
-                "pop"
-            ),
-
+            tile.classList.remove("pop"),
         120
     );
 
@@ -819,15 +839,12 @@ function removeLetter() {
 
     const tile =
         board.children[
-            currentRow *
-            COLS +
+            currentRow * COLS +
             currentTile
         ];
 
 
-    tile.textContent =
-        "";
-
+    tile.textContent = "";
 
     tile.classList.remove(
         "filled"
@@ -844,7 +861,6 @@ function currentGuess() {
 
     let guess = "";
 
-
     for (
         let i = 0;
         i < COLS;
@@ -853,16 +869,26 @@ function currentGuess() {
 
         guess +=
             board.children[
-                currentRow *
-                COLS +
+                currentRow * COLS +
                 i
-            ]
-                .textContent;
+            ].textContent;
 
     }
 
-
     return guess.toLowerCase();
+
+}
+
+
+// ==========================================
+// CHECK BLACK LETTER
+// ==========================================
+
+function containsBlackLetter(guess) {
+
+    return guess.includes(
+        blackLetter
+    );
 
 }
 
@@ -874,16 +900,14 @@ function currentGuess() {
 async function submitGuess() {
 
     if (
-        currentTile !==
-        COLS ||
+        currentTile !== COLS ||
         gameOver ||
         submitting ||
         !answer
     ) {
 
         if (
-            currentTile !==
-            COLS &&
+            currentTile !== COLS &&
             !gameOver
         ) {
 
@@ -908,10 +932,12 @@ async function submitGuess() {
         ];
 
 
+    // ==========================================
+    // DUPLICATE GUESS
+    // ==========================================
+
     if (
-        game.guesses.includes(
-            guess
-        )
+        game.guesses.includes(guess)
     ) {
 
         showToast(
@@ -923,13 +949,13 @@ async function submitGuess() {
     }
 
 
+    // ==========================================
+    // WORD VALIDATION
+    // ==========================================
+
     if (
-        !allowedWords.has(
-            guess
-        ) &&
-        !answerWords.includes(
-            guess
-        )
+        !allowedWords.has(guess) &&
+        !answerWords.includes(guess)
     ) {
 
         showToast(
@@ -943,6 +969,76 @@ async function submitGuess() {
 
     submitting = true;
 
+
+    // ==========================================
+    // BLACK LETTER
+    // ==========================================
+
+    if (
+        containsBlackLetter(guess)
+    ) {
+
+        game.guesses.push(
+            guess
+        );
+
+        game.results.push([
+            "black",
+            "black",
+            "black",
+            "black",
+            "black"
+        ]);
+
+
+        saveState();
+
+
+        await revealBlackRow();
+
+
+        showToast(
+            `BLACK LETTER: ${blackLetter.toUpperCase()}`
+        );
+
+
+        // ==========================================
+        // GUESS IS CONSUMED
+        // ==========================================
+
+        if (
+            currentRow === ROWS - 1
+        ) {
+
+            finishGame(
+                false,
+                game.guesses.length
+            );
+
+        }
+
+        else {
+
+            currentRow++;
+
+            currentTile = 0;
+
+            gameMessage.textContent =
+                `Puzzle ${state.currentGame} of ${GAMES_PER_DAY}`;
+
+        }
+
+
+        submitting = false;
+
+        return;
+
+    }
+
+
+    // ==========================================
+    // NORMAL WORDLE GUESS
+    // ==========================================
 
     const result =
         scoreGuess(
@@ -975,7 +1071,9 @@ async function submitGuess() {
     );
 
 
+    // ==========================================
     // WIN
+    // ==========================================
 
     if (
         guess === answer
@@ -989,11 +1087,12 @@ async function submitGuess() {
     }
 
 
+    // ==========================================
     // LOSS
+    // ==========================================
 
     else if (
-        currentRow ===
-        ROWS - 1
+        currentRow === ROWS - 1
     ) {
 
         finishGame(
@@ -1004,7 +1103,9 @@ async function submitGuess() {
     }
 
 
+    // ==========================================
     // CONTINUE
+    // ==========================================
 
     else {
 
@@ -1030,13 +1131,11 @@ function scoreGuess(
 ) {
 
     const result = [
-
         "gray",
         "gray",
         "gray",
         "gray",
         "gray"
-
     ];
 
 
@@ -1060,7 +1159,6 @@ function scoreGuess(
             result[i] =
                 "green";
 
-
             remaining[i] =
                 null;
 
@@ -1078,8 +1176,7 @@ function scoreGuess(
     ) {
 
         if (
-            result[i] ===
-            "green"
+            result[i] === "green"
         ) {
 
             continue;
@@ -1100,7 +1197,6 @@ function scoreGuess(
             result[i] =
                 "yellow";
 
-
             remaining[index] =
                 null;
 
@@ -1115,14 +1211,13 @@ function scoreGuess(
 
 
 // ==========================================
-// REVEAL ROW
+// REVEAL NORMAL ROW
 // ==========================================
 
 async function revealRow(result) {
 
     const start =
-        currentRow *
-        COLS;
+        currentRow * COLS;
 
 
     for (
@@ -1144,7 +1239,6 @@ async function revealRow(result) {
 
         await new Promise(
             resolve =>
-
                 setTimeout(
                     resolve,
                     110
@@ -1164,7 +1258,65 @@ async function revealRow(result) {
 
         await new Promise(
             resolve =>
+                setTimeout(
+                    resolve,
+                    60
+                )
+        );
 
+    }
+
+}
+
+
+// ==========================================
+// REVEAL BLACK ROW
+// ==========================================
+
+async function revealBlackRow() {
+
+    const start =
+        currentRow * COLS;
+
+
+    for (
+        let i = 0;
+        i < COLS;
+        i++
+    ) {
+
+        const tile =
+            board.children[
+                start + i
+            ];
+
+
+        tile.classList.add(
+            "flip"
+        );
+
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    110
+                )
+        );
+
+
+        tile.classList.remove(
+            "filled"
+        );
+
+
+        tile.classList.add(
+            "black"
+        );
+
+
+        await new Promise(
+            resolve =>
                 setTimeout(
                     resolve,
                     60
@@ -1203,8 +1355,7 @@ function updateKeyboard(
     ) {
 
         const letter =
-            guess[i]
-                .toUpperCase();
+            guess[i].toUpperCase();
 
 
         const next =
@@ -1212,22 +1363,13 @@ function updateKeyboard(
 
 
         if (
-            !keyStates[
-                letter
-            ] ||
+            !keyStates[letter] ||
 
             priority[next] >
-
-            priority[
-                keyStates[
-                    letter
-                ]
-            ]
+            priority[keyStates[letter]]
         ) {
 
-            keyStates[
-                letter
-            ] =
+            keyStates[letter] =
                 next;
 
 
@@ -1240,15 +1382,11 @@ function updateKeyboard(
             if (key) {
 
                 key.classList.remove(
-
                     "green",
-
                     "yellow",
-
-                    "gray"
-
+                    "gray",
+                    "black"
                 );
-
 
                 key.classList.add(
                     next
@@ -1275,6 +1413,10 @@ function restoreGame(game) {
             row
         ) => {
 
+            const result =
+                game.results[row];
+
+
             for (
                 let i = 0;
                 i < COLS;
@@ -1283,39 +1425,36 @@ function restoreGame(game) {
 
                 const tile =
                     board.children[
-                        row *
-                        COLS +
-                        i
+                        row * COLS + i
                     ];
 
 
                 tile.textContent =
-                    guess[i]
-                        .toUpperCase();
+                    guess[i].toUpperCase();
 
 
                 tile.classList.add(
-
                     "filled",
-
-                    game.results[
-                        row
-                    ][i]
-
+                    result[i]
                 );
 
             }
 
 
-            updateKeyboard(
+            // Don't color keyboard
+            // black for the special
+            // black-letter guess.
 
-                game.results[
-                    row
-                ],
+            if (
+                result[0] !== "black"
+            ) {
 
-                guess
+                updateKeyboard(
+                    result,
+                    guess
+                );
 
-            );
+            }
 
         }
     );
@@ -1343,11 +1482,13 @@ function restoreGame(game) {
         );
 
 
+    const usedAllRows =
+        game.guesses.length >= ROWS;
+
+
     if (
         solved ||
-
-        game.guesses.length >=
-        ROWS
+        usedAllRows
     ) {
 
         gameOver = true;
@@ -1355,11 +1496,8 @@ function restoreGame(game) {
 
         currentRow =
             Math.min(
-
                 game.guesses.length - 1,
-
                 ROWS - 1
-
             );
 
 
@@ -1372,7 +1510,6 @@ function restoreGame(game) {
 
         currentRow =
             game.guesses.length;
-
 
         currentTile =
             0;
@@ -1411,17 +1548,12 @@ function finishGame(
 
         state.wins++;
 
-
         state.streak++;
-
 
         state.maxStreak =
             Math.max(
-
                 state.maxStreak,
-
                 state.streak
-
             );
 
 
@@ -1438,8 +1570,7 @@ function finishGame(
 
     else {
 
-        state.streak =
-            0;
+        state.streak = 0;
 
 
         showToast(
@@ -1455,7 +1586,7 @@ function finishGame(
 
 
     // ==========================================
-    // MOVE TO NEXT GAME
+    // NEXT PUZZLE
     // ==========================================
 
     if (
@@ -1476,14 +1607,11 @@ function finishGame(
 
                 state.currentGame++;
 
-
                 saveState();
-
 
                 await loadCurrentGame();
 
             },
-
             1800
         );
 
@@ -1491,7 +1619,7 @@ function finishGame(
 
 
     // ==========================================
-    // ALL GAMES FINISHED
+    // ALL PUZZLES COMPLETE
     // ==========================================
 
     else {
@@ -1526,15 +1654,11 @@ function showToast(message) {
 
     showToast.timer =
         setTimeout(
-
             () =>
-
                 toast.classList.remove(
                     "show"
                 ),
-
             1600
-
         );
 
 }
@@ -1547,43 +1671,33 @@ function showToast(message) {
 function updateStatsModal() {
 
     document
-        .getElementById(
-            "played"
-        )
+        .getElementById("played")
         .textContent =
             state.played;
 
 
     document
-        .getElementById(
-            "winRate"
-        )
+        .getElementById("winRate")
         .textContent =
             state.played
 
                 ? Math.round(
-
                     state.wins /
                     state.played *
                     100
-
                 )
 
                 : 0;
 
 
     document
-        .getElementById(
-            "streak"
-        )
+        .getElementById("streak")
         .textContent =
             state.streak;
 
 
     document
-        .getElementById(
-            "maxStreak"
-        )
+        .getElementById("maxStreak")
         .textContent =
             state.maxStreak;
 
@@ -1600,11 +1714,8 @@ function updateStatsModal() {
 
     const max =
         Math.max(
-
             1,
-
             ...state.distribution
-
         );
 
 
@@ -1624,8 +1735,7 @@ function updateStatsModal() {
                 "dist-row";
 
 
-            row.innerHTML =
-                `
+            row.innerHTML = `
                 <span>
                     ${i + 1}
                 </span>
@@ -1636,15 +1746,13 @@ function updateStatsModal() {
                         width:
                         ${Math.max(
                             8,
-                            count /
-                            max *
-                            100
+                            count / max * 100
                         )}%
                     "
                 >
                     ${count}
                 </div>
-                `;
+            `;
 
 
             distribution.appendChild(
@@ -1684,76 +1792,47 @@ function closeModal(id) {
 
 
 document
-    .getElementById(
-        "helpBtn"
-    )
+    .getElementById("helpBtn")
     .addEventListener(
-
         "click",
-
         () =>
-            openModal(
-                "helpModal"
-            )
-
+            openModal("helpModal")
     );
 
 
 document
-    .getElementById(
-        "statsBtn"
-    )
+    .getElementById("statsBtn")
     .addEventListener(
-
         "click",
-
         () =>
-            openModal(
-                "statsModal"
-            )
-
+            openModal("statsModal")
     );
 
 
 document
-    .querySelectorAll(
-        "[data-close]"
-    )
+    .querySelectorAll("[data-close]")
     .forEach(
-
         btn =>
-
             btn.addEventListener(
-
                 "click",
-
                 () =>
                     closeModal(
                         btn.dataset.close
                     )
-
             )
-
     );
 
 
 document
-    .querySelectorAll(
-        ".modal"
-    )
+    .querySelectorAll(".modal")
     .forEach(
-
         modal =>
-
             modal.addEventListener(
-
                 "click",
-
                 event => {
 
                     if (
-                        event.target ===
-                        modal
+                        event.target === modal
                     ) {
 
                         modal.classList.add(
@@ -1763,9 +1842,7 @@ document
                     }
 
                 }
-
             )
-
     );
 
 
@@ -1774,19 +1851,13 @@ document
 // ==========================================
 
 document.addEventListener(
-
     "keydown",
-
     event => {
 
         if (
-
             event.ctrlKey ||
-
             event.metaKey ||
-
             event.altKey
-
         ) {
 
             return;
@@ -1799,49 +1870,39 @@ document.addEventListener(
 
 
         if (
-            event.key ===
-            "Backspace"
+            event.key === "Backspace"
         ) {
 
             event.preventDefault();
 
-            handleKey(
-                "⌫"
-            );
+            handleKey("⌫");
 
         }
 
         else if (
-            event.key ===
-            "Enter"
+            event.key === "Enter"
         ) {
 
             event.preventDefault();
 
-            handleKey(
-                "ENTER"
-            );
+            handleKey("ENTER");
 
         }
 
         else if (
-            /^[A-Z]$/
-                .test(key)
+            /^[A-Z]$/.test(key)
         ) {
 
-            handleKey(
-                key
-            );
+            handleKey(key);
 
         }
 
     }
-
 );
 
 
 // ==========================================
-// START GAME
+// START
 // ==========================================
 
 init();
