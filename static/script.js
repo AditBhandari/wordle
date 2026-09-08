@@ -6,6 +6,10 @@ const gameMessage = document.getElementById("gameMessage");
 const ROWS = 6;
 const COLS = 5;
 
+// ==========================================
+// CHANGE THIS NUMBER TO CONTROL DAILY GAMES
+// ==========================================
+
 const GAMES_PER_DAY = 3;
 
 const STORAGE_KEY = "wordle-clone-static-v4";
@@ -26,7 +30,7 @@ const keyStates = {};
 
 
 // ==========================================
-// CREATE DAILY GAMES
+// EMPTY STATE
 // ==========================================
 
 function createGames() {
@@ -36,16 +40,10 @@ function createGames() {
     for (let i = 1; i <= GAMES_PER_DAY; i++) {
 
         games[i] = {
-
             guesses: [],
-
             results: [],
-
             completed: false,
-
-            // Number of guesses still available
-            maxAttempts: ROWS
-
+            penaltyCount: 0
         };
 
     }
@@ -54,36 +52,35 @@ function createGames() {
 }
 
 
-// ==========================================
-// EMPTY STATE
-// ==========================================
+function emptyState() {
 
-const emptyState = () => ({
+    return {
 
-    day: null,
+        day: null,
 
-    currentGame: 1,
+        currentGame: 1,
 
-    games: createGames(),
+        games: createGames(),
 
-    played: 0,
+        played: 0,
 
-    wins: 0,
+        wins: 0,
 
-    streak: 0,
+        streak: 0,
 
-    maxStreak: 0,
+        maxStreak: 0,
 
-    distribution: [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-    ]
+        distribution: [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
 
-});
+    };
+}
 
 
 let state = loadState();
@@ -103,36 +100,44 @@ function loadState() {
 
         if (
             saved &&
-            saved.games
+            saved.games &&
+            typeof saved.currentGame === "number"
         ) {
 
-            // Make sure old games get maxAttempts
-            Object.keys(saved.games).forEach(gameNumber => {
+            // Make sure newer fields exist
+            Object.values(saved.games).forEach(game => {
 
-                if (
-                    !saved.games[gameNumber].maxAttempts
-                ) {
+                if (!Array.isArray(game.guesses)) {
+                    game.guesses = [];
+                }
 
-                    saved.games[gameNumber].maxAttempts = ROWS;
+                if (!Array.isArray(game.results)) {
+                    game.results = [];
+                }
 
+                if (typeof game.completed !== "boolean") {
+                    game.completed = false;
+                }
+
+                if (typeof game.penaltyCount !== "number") {
+                    game.penaltyCount = 0;
                 }
 
             });
 
             return saved;
-
         }
 
-        return emptyState();
+    } catch (error) {
+
+        console.error(
+            "Could not load saved game:",
+            error
+        );
 
     }
 
-    catch {
-
-        return emptyState();
-
-    }
-
+    return emptyState();
 }
 
 
@@ -142,40 +147,48 @@ function loadState() {
 
 function saveState() {
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(state)
-    );
+    try {
 
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(state)
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Could not save game:",
+            error
+        );
+
+    }
 }
 
 
 // ==========================================
-// TODAY'S DATE
+// DATE
 // ==========================================
 
 function todayKey() {
 
     const now = new Date();
 
-    const year =
-        now.getFullYear();
+    const year = now.getFullYear();
 
-    const month =
-        String(now.getMonth() + 1)
-            .padStart(2, "0");
+    const month = String(
+        now.getMonth() + 1
+    ).padStart(2, "0");
 
-    const day =
-        String(now.getDate())
-            .padStart(2, "0");
+    const day = String(
+        now.getDate()
+    ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
-
 }
 
 
 // ==========================================
-// GET DAILY WORD INDEX
+// DAILY WORD INDEX
 // ==========================================
 
 async function getDailyIndex(
@@ -202,12 +215,18 @@ async function getDailyIndex(
         view.getUint32(0) %
         answerWords.length
     );
-
 }
 
 
 // ==========================================
-// GET BLACK LETTER
+// BLACK LETTER
+// ==========================================
+// Exactly ONE letter that does not appear
+// anywhere in the answer.
+//
+// The result is deterministic.
+// Therefore refreshing the page does NOT
+// change the black letter.
 // ==========================================
 
 async function getBlackLetter(
@@ -219,21 +238,18 @@ async function getBlackLetter(
     const alphabet =
         "abcdefghijklmnopqrstuvwxyz";
 
-    // Only letters NOT present in answer
-    const possibleLetters =
-        alphabet
-            .split("")
-            .filter(
-                letter =>
-                    !target.includes(letter)
-            );
+    const availableLetters =
+        [...alphabet].filter(
+            letter =>
+                !target.includes(letter)
+        );
 
-    if (!possibleLetters.length) {
+    if (!availableLetters.length) {
         return "";
     }
 
     const seed =
-        `${day}-black-${gameNumber}`;
+        `${day}-black-letter-${gameNumber}`;
 
     const bytes =
         new TextEncoder().encode(seed);
@@ -249,10 +265,9 @@ async function getBlackLetter(
 
     const index =
         view.getUint32(0) %
-        possibleLetters.length;
+        availableLetters.length;
 
-    return possibleLetters[index];
-
+    return availableLetters[index];
 }
 
 
@@ -289,7 +304,6 @@ async function init() {
 
         ]);
 
-
         if (
             !allowedResponse.ok ||
             !answersResponse.ok
@@ -300,7 +314,6 @@ async function init() {
             );
 
         }
-
 
         const [
             allowedText,
@@ -313,40 +326,43 @@ async function init() {
 
         ]);
 
-
         allowedWords =
             new Set(
 
                 allowedText
                     .split(/\r?\n/)
-                    .map(
-                        word =>
-                            word
-                                .trim()
-                                .toLowerCase()
+                    .map(word =>
+                        word
+                            .trim()
+                            .toLowerCase()
                     )
                     .filter(
                         word =>
-                            word.length === 5
+                            word.length === COLS
                     )
 
             );
 
-
         answerWords =
             answersText
                 .split(/\r?\n/)
-                .map(
-                    word =>
-                        word
-                            .trim()
-                            .toLowerCase()
+                .map(word =>
+                    word
+                        .trim()
+                        .toLowerCase()
                 )
                 .filter(
                     word =>
-                        word.length === 5
+                        word.length === COLS
                 );
 
+        if (!answerWords.length) {
+
+            throw new Error(
+                "No answer words found"
+            );
+
+        }
 
         const today =
             todayKey();
@@ -356,45 +372,40 @@ async function init() {
         // NEW DAY
         // ==========================================
 
-        if (
-            state.day !== today
-        ) {
+        if (state.day !== today) {
 
             const stats = {
 
                 played:
-                    state.played,
+                    Number(state.played) || 0,
 
                 wins:
-                    state.wins,
+                    Number(state.wins) || 0,
 
                 streak:
-                    state.streak,
+                    Number(state.streak) || 0,
 
                 maxStreak:
-                    state.maxStreak,
+                    Number(state.maxStreak) || 0,
 
                 distribution:
-                    state.distribution
+                    Array.isArray(state.distribution)
+                        ? state.distribution
+                        : [0, 0, 0, 0, 0, 0]
 
             };
 
-
             state = {
 
-                day:
-                    today,
+                day: today,
 
-                currentGame:
-                    1,
+                currentGame: 1,
 
-                games:
-                    createGames(),
+                games: createGames(),
 
                 ...stats
 
             };
-
 
             saveState();
 
@@ -402,7 +413,7 @@ async function init() {
 
 
         // ==========================================
-        // NUMBER OF GAMES CHANGED
+        // HANDLE CHANGED GAME COUNT
         // ==========================================
 
         if (
@@ -411,7 +422,7 @@ async function init() {
         ) {
 
             const oldGames =
-                state.games;
+                state.games || {};
 
             state.games =
                 createGames();
@@ -450,9 +461,7 @@ async function init() {
 
         updateStatsModal();
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(error);
 
@@ -461,7 +470,6 @@ async function init() {
         );
 
     }
-
 }
 
 
@@ -480,7 +488,9 @@ async function loadCurrentGame() {
     submitting = false;
 
 
-    // Clear keyboard states
+    // ==========================================
+    // RESET KEYBOARD STATE
+    // ==========================================
 
     for (
         const key in keyStates
@@ -489,9 +499,6 @@ async function loadCurrentGame() {
         delete keyStates[key];
 
     }
-
-
-    // Clear keyboard colors
 
     document
         .querySelectorAll(".key")
@@ -507,8 +514,6 @@ async function loadCurrentGame() {
         });
 
 
-    // Create fresh board
-
     createBoard();
 
 
@@ -519,18 +524,23 @@ async function loadCurrentGame() {
         state.currentGame;
 
 
+    // ==========================================
+    // GET ANSWER
+    // ==========================================
+
     const index =
         await getDailyIndex(
             day,
             gameNumber
         );
 
-
     answer =
         answerWords[index];
 
 
-    // Generate black letter
+    // ==========================================
+    // GET THE ONE BLACK LETTER
+    // ==========================================
 
     blackLetter =
         await getBlackLetter(
@@ -541,50 +551,25 @@ async function loadCurrentGame() {
 
 
     const game =
-        state.games[
-            gameNumber
-        ];
+        state.games[gameNumber];
 
 
-    // Make sure maxAttempts exists
+    if (!game) {
 
-    if (
-        !game.maxAttempts ||
-        game.maxAttempts > ROWS
-    ) {
+        console.error(
+            "Game data missing"
+        );
 
-        game.maxAttempts =
-            ROWS;
-
-        saveState();
+        return;
 
     }
 
 
-    // Restore board using the number
-    // of attempts still available
+    // ==========================================
+    // RESTORE GAME
+    // ==========================================
 
     restoreGame(game);
-
-
-    // ==========================================
-    // MARK BLACK LETTER
-    // ==========================================
-
-    if (blackLetter) {
-
-        const blackKey =
-            keyboard.querySelector(
-                `[data-key="${blackLetter.toUpperCase()}"]`
-            );
-
-        if (blackKey) {
-
-            blackKey.classList.add("black");
-
-        }
-
-    }
 
 
     // ==========================================
@@ -594,23 +579,21 @@ async function loadCurrentGame() {
     if (game.completed) {
 
         if (
-            gameNumber === GAMES_PER_DAY
+            gameNumber ===
+            GAMES_PER_DAY
         ) {
 
             gameMessage.textContent =
                 `You completed all ${GAMES_PER_DAY} Wordles today!`;
 
-        }
-        else {
+        } else {
 
             gameMessage.textContent =
-                `Puzzle ${gameNumber} complete`;
+                `Puzzle ${gameNumber} completed.`;
 
         }
 
-    }
-
-    else {
+    } else {
 
         gameMessage.textContent =
             `Puzzle ${gameNumber} of ${GAMES_PER_DAY}`;
@@ -665,12 +648,8 @@ function createKeyboard() {
 
     ];
 
-
     rows.forEach(
-        (
-            row,
-            rowIndex
-        ) => {
+        (row, rowIndex) => {
 
             const rowDiv =
                 document.createElement("div");
@@ -679,9 +658,7 @@ function createKeyboard() {
                 "keyboard-row";
 
 
-            if (
-                rowIndex === 2
-            ) {
+            if (rowIndex === 2) {
 
                 addKey(
                     "ENTER",
@@ -705,9 +682,7 @@ function createKeyboard() {
             }
 
 
-            if (
-                rowIndex === 2
-            ) {
+            if (rowIndex === 2) {
 
                 addKey(
                     "⌫",
@@ -741,6 +716,8 @@ function addKey(
     const key =
         document.createElement("button");
 
+    key.type = "button";
+
     key.className =
         `key${wide ? " wide" : ""}`;
 
@@ -759,13 +736,10 @@ function addKey(
 
     key.addEventListener(
         "click",
-        () =>
-            handleKey(label)
+        () => handleKey(label)
     );
 
-    container.appendChild(
-        key
-    );
+    container.appendChild(key);
 
 }
 
@@ -786,24 +760,21 @@ function handleKey(key) {
 
     }
 
-
-    if (
-        key === "ENTER"
-    ) {
+    if (key === "ENTER") {
 
         submitGuess();
 
     }
 
-    else if (
-        key === "⌫"
-    ) {
+    else if (key === "⌫") {
 
         removeLetter();
 
     }
 
-    else {
+    else if (
+        /^[A-Z]$/.test(key)
+    ) {
 
         addLetter(key);
 
@@ -826,13 +797,11 @@ function addLetter(letter) {
 
     }
 
-
     const tile =
         board.children[
             currentRow * COLS +
             currentTile
         ];
-
 
     tile.textContent =
         letter;
@@ -842,13 +811,10 @@ function addLetter(letter) {
         "pop"
     );
 
-
     setTimeout(
-        () =>
-            tile.classList.remove("pop"),
+        () => tile.classList.remove("pop"),
         120
     );
-
 
     currentTile++;
 
@@ -869,16 +835,13 @@ function removeLetter() {
 
     }
 
-
     currentTile--;
-
 
     const tile =
         board.children[
             currentRow * COLS +
             currentTile
         ];
-
 
     tile.textContent =
         "";
@@ -918,16 +881,23 @@ function currentGuess() {
 
 
 // ==========================================
+// CHECK BLACK LETTER
+// ==========================================
+
+function containsBlackLetter(guess) {
+
+    return guess.includes(
+        blackLetter
+    );
+
+}
+
+
+// ==========================================
 // SUBMIT GUESS
 // ==========================================
 
 async function submitGuess() {
-
-    const game =
-        state.games[
-            state.currentGame
-        ];
-
 
     if (
         currentTile !== COLS ||
@@ -954,6 +924,16 @@ async function submitGuess() {
 
     const guess =
         currentGuess();
+
+    const game =
+        state.games[
+            state.currentGame
+        ];
+
+
+    if (!game) {
+        return;
+    }
 
 
     // ==========================================
@@ -995,16 +975,15 @@ async function submitGuess() {
 
 
     // ==========================================
-    // CHECK BLACK LETTER
+    // BLACK LETTER CHECK
     // ==========================================
 
-    const usedBlackLetter =
-        blackLetter &&
-        guess.includes(blackLetter);
+    const hasBlackLetter =
+        containsBlackLetter(guess);
 
 
     // ==========================================
-    // SCORE GUESS
+    // NORMAL WORDLE SCORE
     // ==========================================
 
     const result =
@@ -1013,6 +992,10 @@ async function submitGuess() {
             answer
         );
 
+
+    // ==========================================
+    // SAVE GUESS
+    // ==========================================
 
     game.guesses.push(
         guess
@@ -1023,11 +1006,18 @@ async function submitGuess() {
     );
 
 
+    if (hasBlackLetter) {
+
+        game.penaltyCount++;
+
+    }
+
+
     saveState();
 
 
     // ==========================================
-    // REVEAL GUESS
+    // SHOW NORMAL RESULT
     // ==========================================
 
     await revealRow(
@@ -1042,44 +1032,6 @@ async function submitGuess() {
 
 
     // ==========================================
-    // BLACK LETTER PENALTY
-    // ==========================================
-
-    if (
-        usedBlackLetter
-    ) {
-
-        showToast(
-            `Black letter! -1 guess`
-        );
-
-
-        // Reduce available guesses
-
-        if (
-            game.maxAttempts > 1
-        ) {
-
-            game.maxAttempts--;
-
-        }
-
-
-        saveState();
-
-
-        // ==========================================
-        // REMOVE THE LAST UNUSED ROW
-        // ==========================================
-
-        removeLastUnusedRow(
-            game
-        );
-
-    }
-
-
-    // ==========================================
     // WIN
     // ==========================================
 
@@ -1089,7 +1041,8 @@ async function submitGuess() {
 
         finishGame(
             true,
-            game.guesses.length
+            game.guesses.length,
+            false
         );
 
         submitting = false;
@@ -1100,17 +1053,73 @@ async function submitGuess() {
 
 
     // ==========================================
-    // CHECK AVAILABLE ATTEMPTS
+    // BLACK LETTER PENALTY
+    // ==========================================
+
+    if (hasBlackLetter) {
+
+        showToast(
+            `Black letter ${blackLetter.toUpperCase()}! -1 guess`
+        );
+
+
+        // Remove one available attempt.
+        //
+        // We don't delete the row containing
+        // the guess because that would visually
+        // erase what the player just entered.
+        //
+        // Instead, the bottom unused row is
+        // permanently removed from the board.
+        // ==========================================
+
+        removeBottomRow();
+
+
+        // If there are no attempts remaining,
+        // the game ends immediately.
+        //
+        // A 6-row board becomes effectively
+        // a 5-attempt game after one penalty.
+        // ==========================================
+
+        const availableRows =
+            ROWS - game.penaltyCount;
+
+
+        if (
+            game.guesses.length >=
+            availableRows
+        ) {
+
+            finishGame(
+                false,
+                game.guesses.length,
+                true
+            );
+
+            submitting = false;
+
+            return;
+
+        }
+
+    }
+
+
+    // ==========================================
+    // NORMAL LOSS CHECK
     // ==========================================
 
     if (
-        game.guesses.length >=
-        game.maxAttempts
+        currentRow >=
+        ROWS - game.penaltyCount - 1
     ) {
 
         finishGame(
             false,
-            game.guesses.length
+            game.guesses.length,
+            false
         );
 
         submitting = false;
@@ -1124,12 +1133,9 @@ async function submitGuess() {
     // NEXT ROW
     // ==========================================
 
-    currentRow =
-        game.guesses.length;
+    currentRow++;
 
-    currentTile =
-        0;
-
+    currentTile = 0;
 
     submitting = false;
 
@@ -1137,45 +1143,13 @@ async function submitGuess() {
 
 
 // ==========================================
-// REMOVE LAST UNUSED ROW
+// REMOVE BOTTOM UNUSED ROW
 // ==========================================
 
-function removeLastUnusedRow(game) {
+function removeBottomRow() {
 
-    /*
-        Example:
-
-        6 rows initially
-
-        Guess 1 contains black letter
-
-        maxAttempts becomes 5
-
-        Rows 1-5 remain.
-        Row 6 disappears.
-    */
-
-
-    const unusedRows =
-        ROWS -
-        game.guesses.length;
-
-
-    if (
-        unusedRows <= 0
-    ) {
-
-        return;
-
-    }
-
-
-    const rowToRemove =
-        game.maxAttempts;
-
-
-    // Remove exactly the row at the
-    // new maximum attempt position.
+    const bottomStart =
+        (ROWS - 1) * COLS;
 
     for (
         let i = 0;
@@ -1183,19 +1157,16 @@ function removeLastUnusedRow(game) {
         i++
     ) {
 
-        const index =
-            rowToRemove * COLS -
-            COLS +
-            i;
-
-
         const tile =
-            board.children[index];
-
+            board.children[
+                bottomStart + i
+            ];
 
         if (tile) {
 
-            tile.remove();
+            tile.classList.add(
+                "removed-row"
+            );
 
         }
 
@@ -1228,7 +1199,9 @@ function scoreGuess(
         target.split("");
 
 
+    // ==========================================
     // GREEN
+    // ==========================================
 
     for (
         let i = 0;
@@ -1237,7 +1210,8 @@ function scoreGuess(
     ) {
 
         if (
-            guess[i] === target[i]
+            guess[i] ===
+            target[i]
         ) {
 
             result[i] =
@@ -1251,7 +1225,9 @@ function scoreGuess(
     }
 
 
-    // YELLOW
+    // ==========================================
+    // YELLOW / BLACK
+    // ==========================================
 
     for (
         let i = 0;
@@ -1260,13 +1236,35 @@ function scoreGuess(
     ) {
 
         if (
-            result[i] === "green"
+            result[i] ===
+            "green"
         ) {
 
             continue;
 
         }
 
+
+        // ==========================================
+        // ONLY THE ONE SELECTED BLACK LETTER
+        // ==========================================
+
+        if (
+            guess[i] ===
+            blackLetter
+        ) {
+
+            result[i] =
+                "black";
+
+            continue;
+
+        }
+
+
+        // ==========================================
+        // NORMAL YELLOW
+        // ==========================================
 
         const index =
             remaining.indexOf(
@@ -1369,11 +1367,13 @@ function updateKeyboard(
 
     const priority = {
 
-        gray: 1,
+        black: 1,
 
-        yellow: 2,
+        gray: 2,
 
-        green: 3
+        yellow: 3,
+
+        green: 4
 
     };
 
@@ -1387,68 +1387,41 @@ function updateKeyboard(
         const letter =
             guess[i].toUpperCase();
 
-
         const next =
             result[i];
+
+
+        const key =
+            keyboard.querySelector(
+                `[data-key="${letter}"]`
+            );
+
+
+        if (!key) {
+            continue;
+        }
 
 
         if (
             !keyStates[letter] ||
             priority[next] >
-            priority[
-                keyStates[letter]
-            ]
+            priority[keyStates[letter]]
         ) {
 
             keyStates[letter] =
                 next;
 
 
-            const key =
-                keyboard.querySelector(
-                    `[data-key="${letter}"]`
-                );
-
-
-            if (key) {
-
-                key.classList.remove(
-                    "green",
-                    "yellow",
-                    "gray"
-                );
-
-                key.classList.add(
-                    next
-                );
-
-            }
-
-        }
-
-    }
-
-
-    // Re-add black styling if necessary
-
-    if (blackLetter) {
-
-        const blackKey =
-            keyboard.querySelector(
-                `[data-key="${blackLetter.toUpperCase()}"]`
-            );
-
-
-        if (blackKey) {
-
-            blackKey.classList.remove(
+            key.classList.remove(
                 "green",
                 "yellow",
-                "gray"
+                "gray",
+                "black"
             );
 
-            blackKey.classList.add(
-                "black"
+
+            key.classList.add(
+                next
             );
 
         }
@@ -1459,18 +1432,40 @@ function updateKeyboard(
 
 
 // ==========================================
-// RESTORE GAME
+// RESTORE SAVED GAME
 // ==========================================
 
 function restoreGame(game) {
 
-    // Restore guesses
+    if (
+        !game ||
+        !Array.isArray(game.guesses)
+    ) {
+
+        return;
+
+    }
+
 
     game.guesses.forEach(
-        (
-            guess,
-            row
-        ) => {
+        (guess, row) => {
+
+            if (
+                row >= ROWS
+            ) {
+
+                return;
+
+            }
+
+
+            const result =
+                game.results[row] ||
+                scoreGuess(
+                    guess,
+                    answer
+                );
+
 
             for (
                 let i = 0;
@@ -1496,14 +1491,14 @@ function restoreGame(game) {
 
                 tile.classList.add(
                     "filled",
-                    game.results[row][i]
+                    result[i]
                 );
 
             }
 
 
             updateKeyboard(
-                game.results[row],
+                result,
                 guess
             );
 
@@ -1512,32 +1507,63 @@ function restoreGame(game) {
 
 
     // ==========================================
-    // REMOVE PENALTY ROWS
+    // RESTORE REMOVED ROWS
     // ==========================================
 
-    const rowsToRemove =
-        ROWS -
-        game.maxAttempts;
-
-
     for (
-        let i = 0;
-        i < rowsToRemove;
-        i++
+        let penalty = 0;
+        penalty < game.penaltyCount;
+        penalty++
     ) {
 
-        removeLastUnusedRow(
-            {
-                ...game,
-                guesses: game.guesses
+        // We don't physically remove a tile
+        // because board dimensions would change.
+        //
+        // Instead mark the corresponding
+        // bottom rows as unavailable.
+        const rowIndex =
+            ROWS - 1 - penalty;
+
+
+        if (
+            rowIndex >= 0
+        ) {
+
+            for (
+                let i = 0;
+                i < COLS;
+                i++
+            ) {
+
+                const tile =
+                    board.children[
+                        rowIndex * COLS +
+                        i
+                    ];
+
+
+                if (
+                    tile &&
+                    !game.guesses[
+                        rowIndex
+                    ]
+                ) {
+
+                    tile.classList.add(
+                        "removed-row"
+                    );
+
+                }
+
             }
-        );
+
+        }
 
     }
 
 
     // ==========================================
-    // GAME OVER
+    // DETERMINE GAME POSITION
     // ==========================================
 
     if (
@@ -1547,9 +1573,9 @@ function restoreGame(game) {
         gameOver = true;
 
         currentRow =
-            Math.max(
-                0,
-                game.guesses.length - 1
+            Math.min(
+                game.guesses.length - 1,
+                ROWS - 1
             );
 
         currentTile =
@@ -1560,25 +1586,52 @@ function restoreGame(game) {
     }
 
 
-    // ==========================================
-    // CHECK MAX ATTEMPTS
-    // ==========================================
-
     if (
-        game.guesses.length >=
-        game.maxAttempts
+        game.guesses.length === 0
     ) {
+
+        currentRow = 0;
+
+        currentTile = 0;
+
+        return;
+
+    }
+
+
+    const lastResult =
+        game.results[
+            game.results.length - 1
+        ];
+
+
+    const solved =
+        lastResult &&
+        lastResult.every(
+            value =>
+                value === "green"
+        );
+
+
+    if (solved) {
 
         gameOver = true;
 
-        currentRow =
-            Math.max(
-                0,
-                game.maxAttempts - 1
-            );
+        return;
 
-        currentTile =
-            COLS;
+    }
+
+
+    const availableRows =
+        ROWS - game.penaltyCount;
+
+
+    if (
+        game.guesses.length >=
+        availableRows
+    ) {
+
+        gameOver = true;
 
         return;
 
@@ -1588,8 +1641,7 @@ function restoreGame(game) {
     currentRow =
         game.guesses.length;
 
-    currentTile =
-        0;
+    currentTile = 0;
 
 }
 
@@ -1600,8 +1652,14 @@ function restoreGame(game) {
 
 function finishGame(
     won,
-    attempts
+    attempts,
+    penaltyLoss
 ) {
+
+    if (gameOver) {
+        return;
+    }
+
 
     gameOver = true;
 
@@ -1612,12 +1670,8 @@ function finishGame(
         ];
 
 
-    if (
-        game.completed
-    ) {
-
+    if (!game) {
         return;
-
     }
 
 
@@ -1641,16 +1695,26 @@ function finishGame(
             );
 
 
-        state.distribution[
+        const distributionIndex =
             Math.min(
                 attempts - 1,
-                5
-            )
-        ]++;
+                state.distribution.length - 1
+            );
+
+
+        if (
+            distributionIndex >= 0
+        ) {
+
+            state.distribution[
+                distributionIndex
+            ]++;
+
+        }
 
 
         gameMessage.textContent =
-            `Solved in ${attempts} guesses`;
+            `Solved in ${attempts}/6`;
 
         showToast(
             "Great job!"
@@ -1660,16 +1724,18 @@ function finishGame(
 
     else {
 
-        state.streak =
-            0;
-
+        state.streak = 0;
 
         gameMessage.textContent =
             `The word was ${answer.toUpperCase()}`;
 
-        showToast(
-            answer.toUpperCase()
-        );
+        if (!penaltyLoss) {
+
+            showToast(
+                answer.toUpperCase()
+            );
+
+        }
 
     }
 
@@ -1680,7 +1746,7 @@ function finishGame(
 
 
     // ==========================================
-    // NEXT PUZZLE
+    // LOAD NEXT PUZZLE
     // ==========================================
 
     if (
@@ -1740,11 +1806,12 @@ function showToast(message) {
 
     showToast.timer =
         setTimeout(
-            () =>
+            () => {
                 toast.classList.remove(
                     "show"
-                ),
-            1600
+                );
+            },
+            1800
         );
 
 }
@@ -1756,15 +1823,38 @@ function showToast(message) {
 
 function updateStatsModal() {
 
-    document
-        .getElementById("played")
-        .textContent =
+    const played =
+        document.getElementById(
+            "played"
+        );
+
+    const winRate =
+        document.getElementById(
+            "winRate"
+        );
+
+    const streak =
+        document.getElementById(
+            "streak"
+        );
+
+    const maxStreak =
+        document.getElementById(
+            "maxStreak"
+        );
+
+
+    if (played) {
+
+        played.textContent =
             state.played;
 
+    }
 
-    document
-        .getElementById("winRate")
-        .textContent =
+
+    if (winRate) {
+
+        winRate.textContent =
             state.played
 
                 ? Math.round(
@@ -1775,23 +1865,34 @@ function updateStatsModal() {
 
                 : 0;
 
+    }
 
-    document
-        .getElementById("streak")
-        .textContent =
+
+    if (streak) {
+
+        streak.textContent =
             state.streak;
 
+    }
 
-    document
-        .getElementById("maxStreak")
-        .textContent =
+
+    if (maxStreak) {
+
+        maxStreak.textContent =
             state.maxStreak;
+
+    }
 
 
     const distribution =
         document.getElementById(
             "distribution"
         );
+
+
+    if (!distribution) {
+        return;
+    }
 
 
     distribution.innerHTML =
@@ -1806,43 +1907,51 @@ function updateStatsModal() {
 
 
     state.distribution.forEach(
-        (
-            count,
-            i
-        ) => {
+        (count, i) => {
 
             const row =
                 document.createElement(
                     "div"
                 );
 
-
             row.className =
                 "dist-row";
 
 
-            row.innerHTML =
-                `
-                <span>
-                    ${i + 1}
-                </span>
+            const number =
+                document.createElement(
+                    "span"
+                );
 
-                <div
-                    class="dist-bar"
-                    style="
-                        width:
-                        ${Math.max(
-                            8,
-                            count /
-                            max *
-                            100
-                        )}%
-                    "
-                >
-                    ${count}
-                </div>
-                `;
+            number.textContent =
+                i + 1;
 
+
+            const bar =
+                document.createElement(
+                    "div"
+                );
+
+            bar.className =
+                "dist-bar";
+
+            bar.style.width =
+                `${Math.max(
+                    8,
+                    count / max * 100
+                )}%`;
+
+            bar.textContent =
+                count;
+
+
+            row.appendChild(
+                number
+            );
+
+            row.appendChild(
+                bar
+            );
 
             distribution.appendChild(
                 row
@@ -1860,79 +1969,113 @@ function updateStatsModal() {
 
 function openModal(id) {
 
-    document
-        .getElementById(id)
-        .classList.remove(
+    const modal =
+        document.getElementById(id);
+
+    if (modal) {
+
+        modal.classList.remove(
             "hidden"
         );
+
+    }
 
 }
 
 
 function closeModal(id) {
 
-    document
-        .getElementById(id)
-        .classList.add(
+    const modal =
+        document.getElementById(id);
+
+    if (modal) {
+
+        modal.classList.add(
             "hidden"
         );
+
+    }
+
+}
+
+
+const helpBtn =
+    document.getElementById(
+        "helpBtn"
+    );
+
+if (helpBtn) {
+
+    helpBtn.addEventListener(
+        "click",
+        () =>
+            openModal(
+                "helpModal"
+            )
+    );
+
+}
+
+
+const statsBtn =
+    document.getElementById(
+        "statsBtn"
+    );
+
+if (statsBtn) {
+
+    statsBtn.addEventListener(
+        "click",
+        () =>
+            openModal(
+                "statsModal"
+            )
+    );
 
 }
 
 
 document
-    .getElementById("helpBtn")
-    .addEventListener(
-        "click",
-        () =>
-            openModal("helpModal")
-    );
+    .querySelectorAll(
+        "[data-close]"
+    )
+    .forEach(btn => {
+
+        btn.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    btn.dataset.close
+                )
+        );
+
+    });
 
 
 document
-    .getElementById("statsBtn")
-    .addEventListener(
-        "click",
-        () =>
-            openModal("statsModal")
-    );
+    .querySelectorAll(
+        ".modal"
+    )
+    .forEach(modal => {
 
+        modal.addEventListener(
+            "click",
+            event => {
 
-document
-    .querySelectorAll("[data-close]")
-    .forEach(
-        btn =>
-            btn.addEventListener(
-                "click",
-                () =>
-                    closeModal(
-                        btn.dataset.close
-                    )
-            )
-    );
+                if (
+                    event.target === modal
+                ) {
 
-
-document
-    .querySelectorAll(".modal")
-    .forEach(
-        modal =>
-            modal.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target === modal
-                    ) {
-
-                        modal.classList.add(
-                            "hidden"
-                        );
-
-                    }
+                    modal.classList.add(
+                        "hidden"
+                    );
 
                 }
-            )
-    );
+
+            }
+        );
+
+    });
 
 
 // ==========================================
@@ -1959,7 +2102,8 @@ document.addEventListener(
 
 
         if (
-            event.key === "Backspace"
+            event.key ===
+            "Backspace"
         ) {
 
             event.preventDefault();
@@ -1969,7 +2113,8 @@ document.addEventListener(
         }
 
         else if (
-            event.key === "Enter"
+            event.key ===
+            "Enter"
         ) {
 
             event.preventDefault();
