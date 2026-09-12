@@ -8,8 +8,6 @@
     --yellow: #c9b458;
     --gray: #787c7e;
 
-    --black: #000000;
-
     --surface: #ffffff;
     --overlay: rgba(0, 0, 0, .42);
 }
@@ -27,13 +25,10 @@ body {
     margin: 0;
     background: var(--surface);
     color: var(--text);
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 
     -webkit-tap-highlight-color: transparent;
+
     overscroll-behavior: none;
 }
 
@@ -41,9 +36,13 @@ button {
     font: inherit;
 }
 
+
+/* ==========================================
+   APP
+========================================== */
+
 .app {
     width: min(100%, 560px);
-
     min-height: 100dvh;
 
     margin: 0 auto;
@@ -58,20 +57,21 @@ button {
 }
 
 
-/* =====================================================
+/* ==========================================
    TOP BAR
-   ===================================================== */
+========================================== */
 
 .topbar {
     height: 58px;
 
-    border-bottom:
-        1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
 
     display: grid;
 
     grid-template-columns:
-        44px 1fr 44px;
+        44px
+        1fr
+        44px;
 
     align-items: center;
 
@@ -113,15 +113,68 @@ button {
 }
 
 
-/* =====================================================
+/* ==========================================
+   GAME INFORMATION
+========================================== */
+
+.game-info {
+    width: 100%;
+
+    text-align: center;
+
+    margin:
+        13px auto
+        0;
+
+    min-height: 52px;
+}
+
+.game-mode {
+    font-size: 17px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 4px;
+}
+
+.game-description {
+    color: var(--muted);
+
+    font-size: 13px;
+
+    line-height: 1.3;
+
+    min-height: 17px;
+}
+
+.timer {
+    margin-top: 5px;
+
+    font-size: 19px;
+
+    font-weight: 800;
+
+    min-height: 22px;
+}
+
+.timer:empty {
+    display: none;
+}
+
+
+/* ==========================================
    BOARD
-   ===================================================== */
+========================================== */
 
 .board {
     width: min(350px, 88vw);
 
     margin:
-        18px auto
+        10px auto
         12px;
 
     display: grid;
@@ -130,18 +183,18 @@ button {
         repeat(5, 1fr);
 
     gap: 5px;
+
+    transition: all .2s ease;
 }
 
 .tile {
     aspect-ratio: 1;
 
-    border:
-        2px solid var(--border);
+    border: 2px solid var(--border);
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     font-size:
@@ -158,22 +211,18 @@ button {
     user-select: none;
 
     transition:
-        opacity .2s,
-        transform .2s;
+        background-color .15s,
+        border-color .15s;
 }
 
 .tile.filled {
     border-color: #878a8c;
 }
 
-
-/* =====================================================
-   NORMAL WORDLE COLOURS
-   ===================================================== */
-
 .tile.green,
 .tile.yellow,
-.tile.gray {
+.tile.gray,
+.tile.black {
     color: #fff;
 
     border-color: transparent;
@@ -191,34 +240,15 @@ button {
     background: var(--gray);
 }
 
-
-/* =====================================================
-   BLACK LETTER
-   ===================================================== */
-
 .tile.black {
-    background: var(--black);
-
+    background: #000;
     color: #fff;
-
-    border-color: var(--black);
 }
 
 
-/* =====================================================
-   REMOVED ROW
-   ===================================================== */
-
-.tile.removed-row {
-    visibility: hidden;
-
-    pointer-events: none;
-}
-
-
-/* =====================================================
-   POP ANIMATION
-   ===================================================== */
+/* ==========================================
+   ANIMATIONS
+========================================== */
 
 @keyframes pop {
 
@@ -237,14 +267,9 @@ button {
 }
 
 .tile.pop {
-    animation:
-        pop .12s ease-out;
+    animation: pop .12s ease-out;
 }
 
-
-/* =====================================================
-   FLIP ANIMATION
-   ===================================================== */
 
 @keyframes flip {
 
@@ -263,14 +288,13 @@ button {
 }
 
 .tile.flip {
-    animation:
-        flip .48s ease-in-out;
+    animation: flip .48s ease-in-out;
 }
 
 
-/* =====================================================
+/* ==========================================
    KEYBOARD
-   ===================================================== */
+========================================== */
 
 .keyboard {
     width: min(500px, 100%);
@@ -281,7 +305,9 @@ button {
         12px;
 
     padding:
-        0 0 4px;
+        0
+        0
+        4px;
 
     display: flex;
 
@@ -307,6 +333,8 @@ button {
 
     min-width: 0;
 
+    max-width: 43px;
+
     height: 54px;
 
     border: 0;
@@ -330,18 +358,18 @@ button {
 
 .key.wide {
     flex:
-        1.5 1 0;
+        1.5
+        1
+        0;
+
+    max-width: 65px;
+
+    font-size: 12px;
 }
-
-
-/* =====================================================
-   KEYBOARD COLOURS
-   ===================================================== */
 
 .key.green,
 .key.yellow,
-.key.gray,
-.key.black {
+.key.gray {
     color: #fff;
 }
 
@@ -357,14 +385,10 @@ button {
     background: var(--gray);
 }
 
-.key.black {
-    background: var(--black);
-}
 
-
-/* =====================================================
+/* ==========================================
    GAME MESSAGE
-   ===================================================== */
+========================================== */
 
 .game-message {
     min-height: 24px;
@@ -377,9 +401,9 @@ button {
 }
 
 
-/* =====================================================
+/* ==========================================
    TOAST
-   ===================================================== */
+========================================== */
 
 .toast {
     position: fixed;
@@ -401,7 +425,8 @@ button {
     color: white;
 
     padding:
-        10px 14px;
+        10px
+        14px;
 
     border-radius: 5px;
 
@@ -427,9 +452,9 @@ button {
 }
 
 
-/* =====================================================
+/* ==========================================
    MODALS
-   ===================================================== */
+========================================== */
 
 .modal {
     position: fixed;
@@ -456,10 +481,7 @@ button {
 .modal-card {
     position: relative;
 
-    width: min(
-        430px,
-        100%
-    );
+    width: min(430px, 100%);
 
     max-height: 90dvh;
 
@@ -480,6 +502,15 @@ button {
     margin-top: 0;
 }
 
+.modal-card h3 {
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
+
+.modal-card p {
+    line-height: 1.45;
+}
+
 .close-btn {
     position: absolute;
 
@@ -497,9 +528,9 @@ button {
 }
 
 
-/* =====================================================
+/* ==========================================
    HELP EXAMPLES
-   ===================================================== */
+========================================== */
 
 .example {
     display: flex;
@@ -515,11 +546,12 @@ button {
 
 .example-tile {
     width: 42px;
-
     height: 42px;
 
     flex:
-        0 0 42px;
+        0
+        0
+        42px;
 
     display: grid;
 
@@ -543,13 +575,13 @@ button {
 }
 
 .example-tile.black {
-    background: var(--black);
+    background: #000;
 }
 
 
-/* =====================================================
+/* ==========================================
    STATISTICS
-   ===================================================== */
+========================================== */
 
 .stat-grid {
     display: grid;
@@ -561,7 +593,8 @@ button {
 
     gap: 8px;
 
-    margin: 20px 0;
+    margin:
+        20px 0;
 }
 
 .stat-grid strong,
@@ -589,7 +622,8 @@ button {
     display: grid;
 
     grid-template-columns:
-        18px 1fr;
+        18px
+        1fr;
 
     gap: 5px;
 
@@ -602,7 +636,8 @@ button {
     height: 20px;
 
     padding:
-        0 7px;
+        0
+        7px;
 
     background: var(--gray);
 
@@ -620,9 +655,9 @@ button {
 }
 
 
-/* =====================================================
+/* ==========================================
    MOBILE
-   ===================================================== */
+========================================== */
 
 @media (max-width: 430px) {
 
@@ -639,18 +674,26 @@ button {
         font-size: 26px;
     }
 
-    .board {
-        width:
-            min(
-                330px,
-                88vw
-            );
+    .game-info {
+        margin-top: 11px;
+    }
 
-        margin-top: 14px;
+    .game-mode {
+        font-size: 16px;
+    }
+
+    .game-description {
+        font-size: 12px;
+    }
+
+    .board {
+        width: min(330px, 88vw);
+
+        margin-top: 8px;
     }
 
     .keyboard {
-        gap: 4px;
+        gap: 5px;
     }
 
     .keyboard-row {
@@ -663,6 +706,9 @@ button {
         font-size: 13px;
     }
 
+    .key.wide {
+        font-size: 11px;
+    }
 }
 
 
@@ -676,6 +722,10 @@ button {
         height: 48px;
 
         font-size: 12px;
+    }
+
+    .key.wide {
+        font-size: 10px;
     }
 
 }
