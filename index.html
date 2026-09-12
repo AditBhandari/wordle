@@ -1,250 +1,279 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1, viewport-fit=cover"
     >
 
-    <meta name="theme-color" content="#ffffff">
+    <meta
+        name="theme-color"
+        content="#ffffff"
+    >
 
-    <title>EVIL WORDLE</title>
+    <title>EVIL WORLDE</title>
 
-    <link rel="stylesheet" href="static/style.css">
+    <link
+        rel="stylesheet"
+        href="static/style.css"
+    >
 </head>
 
 <body>
 
-<main class="app">
+    <main class="app">
 
-    <!-- TOP BAR -->
-    <header class="topbar">
+        <!-- TOP BAR -->
+        <header class="topbar">
 
-        <button
-            class="icon-btn"
-            id="helpBtn"
-            aria-label="How to play"
-        >
-            ?
-        </button>
+            <button
+                class="icon-btn"
+                id="helpBtn"
+                aria-label="How to play"
+            >
+                ?
+            </button>
 
-        <div class="title-area">
             <h1>EVIL WORDLE</h1>
 
-            <div
-                id="gameMode"
-                class="game-mode"
+            <button
+                class="icon-btn"
+                id="statsBtn"
+                aria-label="Statistics"
             >
-                BLACK LETTER
-            </div>
+                ▥
+            </button>
 
-            <div
-                id="gameDescription"
-                class="game-description"
-            >
-                One secret letter costs you a guess.
-            </div>
-        </div>
-
-        <button
-            class="icon-btn"
-            id="statsBtn"
-            aria-label="Statistics"
-        >
-            ▥
-        </button>
-
-    </header>
+        </header>
 
 
-    <!-- TOAST -->
-    <div
-        id="toast"
-        class="toast"
-        role="status"
-        aria-live="polite"
-    ></div>
-
-
-    <!-- TIMER -->
-    <div
-        id="timer"
-        class="timer hidden"
-    >
-        60
-    </div>
-
-
-    <!-- BOARD -->
-    <section
-        id="board"
-        class="board"
-        aria-label="Wordle board"
-    ></section>
-
-
-    <!-- KEYBOARD -->
-    <section
-        id="keyboard"
-        class="keyboard"
-        aria-label="Keyboard"
-    ></section>
-
-
-    <!-- GAME MESSAGE -->
-    <div
-        class="game-message"
-        id="gameMessage"
-        aria-live="polite"
-    ></div>
-
-</main>
-
-
-<!-- HELP MODAL -->
-
-<div
-    class="modal hidden"
-    id="helpModal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="helpTitle"
->
-
-    <div class="modal-card">
-
-        <button
-            class="close-btn"
-            data-close="helpModal"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-        <h2 id="helpTitle">
-            How to play
-        </h2>
-
-        <p>
-            Guess the five-letter word in as few tries as possible.
-        </p>
-
-        <div class="example">
-            <span class="example-tile green">W</span>
-            <span>
-                W is in the word and in the correct spot.
-            </span>
-        </div>
-
-        <div class="example">
-            <span class="example-tile yellow">O</span>
-            <span>
-                O is in the word but in the wrong spot.
-            </span>
-        </div>
-
-        <div class="example">
-            <span class="example-tile gray">R</span>
-            <span>
-                R is not in the word.
-            </span>
-        </div>
-
-        <div class="example">
-            <span class="example-tile black">X</span>
-            <span>
-                In Black Letter mode, one secret letter costs you a guess.
-            </span>
-        </div>
-
-        <hr>
-
-        <h3>Today's modes</h3>
-
-        <p>
-            <strong>1. BLACK LETTER</strong><br>
-            A secret letter is hidden. Entering it costs one guess.
-        </p>
-
-        <p>
-            <strong>2. TIMER</strong><br>
-            Solve the Wordle before the countdown reaches zero.
-        </p>
-
-        <p>
-            <strong>3. COLOURBLIND</strong><br>
-            Green letters are revealed normally. Yellow letters remain grey.
-        </p>
-
-    </div>
-
-</div>
-
-
-<!-- STATS MODAL -->
-
-<div
-    class="modal hidden"
-    id="statsModal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="statsTitle"
->
-
-    <div class="modal-card stats-card">
-
-        <button
-            class="close-btn"
-            data-close="statsModal"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-        <h2 id="statsTitle">
-            Statistics
-        </h2>
-
-        <div class="stat-grid">
-
-            <div>
-                <strong id="played">0</strong>
-                <span>Played</span>
-            </div>
-
-            <div>
-                <strong id="winRate">0</strong>
-                <span>Win %</span>
-            </div>
-
-            <div>
-                <strong id="streak">0</strong>
-                <span>Streak</span>
-            </div>
-
-            <div>
-                <strong id="maxStreak">0</strong>
-                <span>Best</span>
-            </div>
-
-        </div>
-
-        <h3>
-            Guess distribution
-        </h3>
-
+        <!-- TOAST -->
         <div
-            id="distribution"
-            class="distribution"
+            id="toast"
+            class="toast"
+            role="status"
+            aria-live="polite"
         ></div>
 
+
+        <!-- GAME INFORMATION -->
+        <section
+            class="game-info"
+            aria-live="polite"
+        >
+
+            <div
+                class="game-mode"
+                id="gameMode"
+            ></div>
+
+            <div
+                class="game-description"
+                id="gameDescription"
+            ></div>
+
+            <div
+                class="timer"
+                id="timer"
+            ></div>
+
+        </section>
+
+
+        <!-- BOARD -->
+        <section
+            id="board"
+            class="board"
+            aria-label="Wordle board"
+        ></section>
+
+
+        <!-- KEYBOARD -->
+        <section
+            id="keyboard"
+            class="keyboard"
+            aria-label="Keyboard"
+        ></section>
+
+
+        <!-- GAME MESSAGE -->
+        <div
+            class="game-message"
+            id="gameMessage"
+            aria-live="polite"
+        ></div>
+
+    </main>
+
+
+    <!-- HELP MODAL -->
+    <div
+        class="modal hidden"
+        id="helpModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="helpTitle"
+    >
+
+        <div class="modal-card">
+
+            <button
+                class="close-btn"
+                data-close="helpModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+            <h2 id="helpTitle">
+                How to play
+            </h2>
+
+            <p>
+                Guess the five-letter word in six tries.
+                Each puzzle has a different challenge.
+            </p>
+
+
+            <h3>Game 1 — Black Letter</h3>
+
+            <p>
+                One secret letter has been selected.
+                You will not be told which letter it is.
+                If you use it in a guess, you lose one
+                available guess.
+            </p>
+
+            <div class="example">
+                <span class="example-tile green">W</span>
+                <span>
+                    Green means the letter is correct
+                    and in the correct position.
+                </span>
+            </div>
+
+            <div class="example">
+                <span class="example-tile yellow">O</span>
+                <span>
+                    Yellow means the letter is in the
+                    word but in the wrong position.
+                </span>
+            </div>
+
+            <div class="example">
+                <span class="example-tile gray">R</span>
+                <span>
+                    Gray means the letter is not in
+                    the answer.
+                </span>
+            </div>
+
+            <p>
+                The black letter remains completely secret.
+            </p>
+
+
+            <h3>Game 2 — Time Challenge</h3>
+
+            <p>
+                Solve the word before the timer runs out.
+                The normal Wordle rules apply.
+            </p>
+
+
+            <h3>Game 3 — Colourblind</h3>
+
+            <p>
+                Green and gray letters work normally,
+                but yellow letters are shown as normal
+                gray tiles.
+            </p>
+
+            <div class="example">
+                <span class="example-tile green">W</span>
+                <span>
+                    Green letters remain visible.
+                </span>
+            </div>
+
+            <div class="example">
+                <span class="example-tile gray">O</span>
+                <span>
+                    Yellow letters appear as normal gray
+                    tiles, so you cannot tell that they
+                    are in the word.
+                </span>
+            </div>
+
+        </div>
+
     </div>
 
-</div>
+
+    <!-- STATISTICS MODAL -->
+    <div
+        class="modal hidden"
+        id="statsModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="statsTitle"
+    >
+
+        <div class="modal-card stats-card">
+
+            <button
+                class="close-btn"
+                data-close="statsModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+            <h2 id="statsTitle">
+                Statistics
+            </h2>
+
+            <div class="stat-grid">
+
+                <div>
+                    <strong id="played">0</strong>
+                    <span>Played</span>
+                </div>
+
+                <div>
+                    <strong id="winRate">0</strong>
+                    <span>Win %</span>
+                </div>
+
+                <div>
+                    <strong id="streak">0</strong>
+                    <span>Streak</span>
+                </div>
+
+                <div>
+                    <strong id="maxStreak">0</strong>
+                    <span>Best</span>
+                </div>
+
+            </div>
+
+            <h3>Guess distribution</h3>
+
+            <div
+                id="distribution"
+                class="distribution"
+            ></div>
+
+        </div>
+
+    </div>
 
 
-<script src="static/script.js"></script>
+    <script src="static/script.js"></script>
 
 </body>
+
 </html>
