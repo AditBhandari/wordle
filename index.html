@@ -7,50 +7,241 @@
     <title>Wordle: No Mercy</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
+
 <body>
-    <main class="app">
-        <header class="topbar">
-            <button class="icon-btn" id="helpBtn" aria-label="How to play">?</button>
-            <h1>WORDLE: NO MERCY</h1>
-            <button class="icon-btn" id="statsBtn" aria-label="Statistics">▥</button>
-        </header>
 
-        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<main class="app">
 
-        <section id="board" class="board" aria-label="Wordle board"></section>
+    <header class="topbar">
 
-        <section id="keyboard" class="keyboard" aria-label="Keyboard"></section>
+        <button
+            class="icon-btn"
+            id="helpBtn"
+            aria-label="How to play"
+        >
+            ?
+        </button>
 
-        <div class="game-message" id="gameMessage" aria-live="polite"></div>
-    </main>
+        <h1>WORDLE: NO MERCY</h1>
 
-    <div class="modal hidden" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-        <div class="modal-card">
-            <button class="close-btn" data-close="helpModal" aria-label="Close">×</button>
-            <h2 id="helpTitle">How to play</h2>
-            <p>Guess the five-letter word in six tries.</p>
-            <div class="example"><span class="example-tile green">W</span><span>W is in the word and in the correct spot.</span></div>
-            <div class="example"><span class="example-tile yellow">O</span><span>O is in the word but in the wrong spot.</span></div>
-            <div class="example"><span class="example-tile gray">R</span><span>R is not in the word.</span></div>
-            <div class="example"><span class="example-tile black">X</span><span>One random black letter, which if entered you lose one guess.</span></div>
+        <button
+            class="icon-btn"
+            id="statsBtn"
+            aria-label="Statistics"
+        >
+            ▥
+        </button>
+
+    </header>
+
+
+    <!-- GAME INFORMATION -->
+
+    <section class="game-info">
+
+        <div
+            id="gameMode"
+            class="game-mode"
+        >
+            PUZZLE 1
         </div>
+
+        <div
+            id="timer"
+            class="timer hidden"
+        >
+            2:00
+        </div>
+
+        <div
+            id="blackLetterDisplay"
+            class="black-letter-display hidden"
+        >
+            Black letter:
+            <strong id="blackLetter"></strong>
+        </div>
+
+    </section>
+
+
+    <div
+        id="toast"
+        class="toast"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+
+    <!-- BOARD -->
+
+    <section
+        id="board"
+        class="board"
+        aria-label="Wordle board"
+    ></section>
+
+
+    <!-- KEYBOARD -->
+
+    <section
+        id="keyboard"
+        class="keyboard"
+        aria-label="Keyboard"
+    ></section>
+
+
+    <div
+        class="game-message"
+        id="gameMessage"
+        aria-live="polite"
+    ></div>
+
+</main>
+
+
+<!-- HELP MODAL -->
+
+<div
+    class="modal hidden"
+    id="helpModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="helpTitle"
+>
+
+    <div class="modal-card">
+
+        <button
+            class="close-btn"
+            data-close="helpModal"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+        <h2 id="helpTitle">
+            How to play
+        </h2>
+
+        <p>
+            Guess the five-letter word in as few tries as possible.
+        </p>
+
+        <div class="example">
+            <span class="example-tile green">W</span>
+            <span>
+                W is in the word and in the correct spot.
+            </span>
+        </div>
+
+        <div class="example">
+            <span class="example-tile yellow">O</span>
+            <span>
+                O is in the word but in the wrong spot.
+            </span>
+        </div>
+
+        <div class="example">
+            <span class="example-tile gray">R</span>
+            <span>
+                R is not in the word.
+            </span>
+        </div>
+
+        <div class="example">
+            <span class="example-tile black">X</span>
+            <span>
+                The black letter is dangerous. Using it removes one available guess.
+            </span>
+        </div>
+
+        <hr>
+
+        <h3>Today's challenges</h3>
+
+        <p>
+            <strong>Game 1 — Time Challenge:</strong>
+            Solve the word before the timer reaches zero.
+        </p>
+
+        <p>
+            <strong>Game 2 — Green Only:</strong>
+            After each guess, only correctly positioned green letters remain visible.
+        </p>
+
+        <p>
+            <strong>Game 3 — Black Letter:</strong>
+            Avoid the black letter. Using it removes one row from your board.
+        </p>
+
     </div>
 
-    <div class="modal hidden" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
-        <div class="modal-card stats-card">
-            <button class="close-btn" data-close="statsModal" aria-label="Close">×</button>
-            <h2 id="statsTitle">Statistics</h2>
-            <div class="stat-grid">
-                <div><strong id="played">0</strong><span>Played</span></div>
-                <div><strong id="winRate">0</strong><span>Win %</span></div>
-                <div><strong id="streak">0</strong><span>Streak</span></div>
-                <div><strong id="maxStreak">0</strong><span>Best</span></div>
+</div>
+
+
+<!-- STATS MODAL -->
+
+<div
+    class="modal hidden"
+    id="statsModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="statsTitle"
+>
+
+    <div class="modal-card stats-card">
+
+        <button
+            class="close-btn"
+            data-close="statsModal"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+        <h2 id="statsTitle">
+            Statistics
+        </h2>
+
+        <div class="stat-grid">
+
+            <div>
+                <strong id="played">0</strong>
+                <span>Played</span>
             </div>
-            <h3>Guess distribution</h3>
-            <div id="distribution" class="distribution"></div>
+
+            <div>
+                <strong id="winRate">0</strong>
+                <span>Win %</span>
+            </div>
+
+            <div>
+                <strong id="streak">0</strong>
+                <span>Streak</span>
+            </div>
+
+            <div>
+                <strong id="maxStreak">0</strong>
+                <span>Best</span>
+            </div>
+
         </div>
+
+        <h3>
+            Guess distribution
+        </h3>
+
+        <div
+            id="distribution"
+            class="distribution"
+        ></div>
+
     </div>
 
-    <script src="static/script.js"></script>
+</div>
+
+
+<script src="static/script.js"></script>
+
 </body>
 </html>
