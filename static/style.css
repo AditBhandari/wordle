@@ -25,7 +25,6 @@ body {
 
 body {
     margin: 0;
-
     background: var(--surface);
     color: var(--text);
 
@@ -35,7 +34,6 @@ body {
         sans-serif;
 
     -webkit-tap-highlight-color: transparent;
-
     overscroll-behavior: none;
 }
 
@@ -60,21 +58,20 @@ button {
 }
 
 
-/* ==========================================
+/* =====================================================
    TOP BAR
-========================================== */
+   ===================================================== */
 
 .topbar {
     height: 58px;
 
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom:
+        1px solid #e5e5e5;
 
     display: grid;
 
     grid-template-columns:
-        44px
-        1fr
-        44px;
+        44px 1fr 44px;
 
     align-items: center;
 
@@ -116,97 +113,15 @@ button {
 }
 
 
-/* ==========================================
-   GAME INFO
-========================================== */
-
-.game-info {
-    min-height: 54px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    flex-direction: column;
-
-    gap: 3px;
-
-    padding-top: 7px;
-}
-
-.game-mode {
-    font-size: 13px;
-
-    font-weight: 800;
-
-    letter-spacing: 1px;
-
-    color: var(--muted);
-
-    text-align: center;
-}
-
-.timer {
-    font-size: 25px;
-
-    font-weight: 800;
-
-    line-height: 1;
-}
-
-.timer.hidden {
-    display: none;
-}
-
-.timer.warning {
-    font-weight: 900;
-}
-
-.black-letter-display {
-    font-size: 13px;
-
-    color: var(--muted);
-
-    font-weight: 700;
-}
-
-.black-letter-display strong {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    margin-left: 4px;
-
-    width: 24px;
-    height: 24px;
-
-    background: var(--black);
-
-    color: white;
-
-    border-radius: 3px;
-
-    font-size: 14px;
-}
-
-.black-letter-display.hidden {
-    display: none;
-}
-
-
-/* ==========================================
+/* =====================================================
    BOARD
-========================================== */
+   ===================================================== */
 
 .board {
     width: min(350px, 88vw);
 
     margin:
-        8px
-        auto
+        18px auto
         12px;
 
     display: grid;
@@ -215,15 +130,13 @@ button {
         repeat(5, 1fr);
 
     gap: 5px;
-
-    transition:
-        height .25s ease;
 }
 
 .tile {
     aspect-ratio: 1;
 
-    border: 2px solid var(--border);
+    border:
+        2px solid var(--border);
 
     display: flex;
 
@@ -245,18 +158,22 @@ button {
     user-select: none;
 
     transition:
-        opacity .2s ease,
-        transform .2s ease;
+        opacity .2s,
+        transform .2s;
 }
 
 .tile.filled {
     border-color: #878a8c;
 }
 
+
+/* =====================================================
+   NORMAL WORDLE COLOURS
+   ===================================================== */
+
 .tile.green,
 .tile.yellow,
-.tile.gray,
-.tile.black {
+.tile.gray {
     color: #fff;
 
     border-color: transparent;
@@ -274,27 +191,34 @@ button {
     background: var(--gray);
 }
 
+
+/* =====================================================
+   BLACK LETTER
+   ===================================================== */
+
 .tile.black {
     background: var(--black);
+
+    color: #fff;
+
+    border-color: var(--black);
 }
 
 
-/* ==========================================
-   GREEN ONLY MODE
-========================================== */
+/* =====================================================
+   REMOVED ROW
+   ===================================================== */
 
-.tile.hidden-letter {
-    color: transparent !important;
+.tile.removed-row {
+    visibility: hidden;
 
-    background: transparent !important;
-
-    border-color: transparent !important;
+    pointer-events: none;
 }
 
 
-/* ==========================================
-   ANIMATIONS
-========================================== */
+/* =====================================================
+   POP ANIMATION
+   ===================================================== */
 
 @keyframes pop {
 
@@ -318,21 +242,22 @@ button {
 }
 
 
+/* =====================================================
+   FLIP ANIMATION
+   ===================================================== */
+
 @keyframes flip {
 
     0% {
-        transform:
-            rotateX(0);
+        transform: rotateX(0);
     }
 
     50% {
-        transform:
-            rotateX(90deg);
+        transform: rotateX(90deg);
     }
 
     100% {
-        transform:
-            rotateX(0);
+        transform: rotateX(0);
     }
 
 }
@@ -343,9 +268,9 @@ button {
 }
 
 
-/* ==========================================
+/* =====================================================
    KEYBOARD
-========================================== */
+   ===================================================== */
 
 .keyboard {
     width: min(500px, 100%);
@@ -356,9 +281,7 @@ button {
         12px;
 
     padding:
-        0
-        0
-        4px;
+        0 0 4px;
 
     display: flex;
 
@@ -380,10 +303,7 @@ button {
 }
 
 .key {
-    flex:
-        1
-        1
-        0;
+    flex: 1 1 0;
 
     min-width: 0;
 
@@ -406,16 +326,17 @@ button {
     user-select: none;
 
     touch-action: manipulation;
-
-    padding: 0 3px;
 }
 
 .key.wide {
     flex:
-        1.5
-        1.5
-        0;
+        1.5 1 0;
 }
+
+
+/* =====================================================
+   KEYBOARD COLOURS
+   ===================================================== */
 
 .key.green,
 .key.yellow,
@@ -441,9 +362,9 @@ button {
 }
 
 
-/* ==========================================
+/* =====================================================
    GAME MESSAGE
-========================================== */
+   ===================================================== */
 
 .game-message {
     min-height: 24px;
@@ -456,9 +377,9 @@ button {
 }
 
 
-/* ==========================================
+/* =====================================================
    TOAST
-========================================== */
+   ===================================================== */
 
 .toast {
     position: fixed;
@@ -480,8 +401,7 @@ button {
     color: white;
 
     padding:
-        10px
-        14px;
+        10px 14px;
 
     border-radius: 5px;
 
@@ -507,9 +427,9 @@ button {
 }
 
 
-/* ==========================================
+/* =====================================================
    MODALS
-========================================== */
+   ===================================================== */
 
 .modal {
     position: fixed;
@@ -536,7 +456,10 @@ button {
 .modal-card {
     position: relative;
 
-    width: min(430px, 100%);
+    width: min(
+        430px,
+        100%
+    );
 
     max-height: 90dvh;
 
@@ -574,9 +497,9 @@ button {
 }
 
 
-/* ==========================================
-   EXAMPLES
-========================================== */
+/* =====================================================
+   HELP EXAMPLES
+   ===================================================== */
 
 .example {
     display: flex;
@@ -592,11 +515,11 @@ button {
 
 .example-tile {
     width: 42px;
+
     height: 42px;
 
     flex:
-        0 0
-        42px;
+        0 0 42px;
 
     display: grid;
 
@@ -624,9 +547,9 @@ button {
 }
 
 
-/* ==========================================
-   STATS
-========================================== */
+/* =====================================================
+   STATISTICS
+   ===================================================== */
 
 .stat-grid {
     display: grid;
@@ -666,8 +589,7 @@ button {
     display: grid;
 
     grid-template-columns:
-        18px
-        1fr;
+        18px 1fr;
 
     gap: 5px;
 
@@ -680,8 +602,7 @@ button {
     height: 20px;
 
     padding:
-        0
-        7px;
+        0 7px;
 
     background: var(--gray);
 
@@ -699,9 +620,9 @@ button {
 }
 
 
-/* ==========================================
+/* =====================================================
    MOBILE
-========================================== */
+   ===================================================== */
 
 @media (max-width: 430px) {
 
@@ -725,7 +646,7 @@ button {
                 88vw
             );
 
-        margin-top: 5px;
+        margin-top: 14px;
     }
 
     .keyboard {
@@ -741,6 +662,7 @@ button {
 
         font-size: 13px;
     }
+
 }
 
 
@@ -754,10 +676,6 @@ button {
         height: 48px;
 
         font-size: 12px;
-    }
-
-    .keyboard-row {
-        gap: 3px;
     }
 
 }
