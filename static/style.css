@@ -8,7 +8,7 @@
     --yellow: #c9b458;
     --gray: #787c7e;
 
-    --black-letter: #000000;
+    --black: #000000;
 
     --surface: #ffffff;
     --overlay: rgba(0, 0, 0, .42);
@@ -25,9 +25,14 @@ body {
 
 body {
     margin: 0;
+
     background: var(--surface);
     color: var(--text);
-    font-family: Arial, Helvetica, sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
     -webkit-tap-highlight-color: transparent;
 
@@ -38,13 +43,9 @@ button {
     font: inherit;
 }
 
-
-/* ==========================================
-   APP
-========================================== */
-
 .app {
     width: min(100%, 560px);
+
     min-height: 100dvh;
 
     margin: 0 auto;
@@ -66,8 +67,7 @@ button {
 .topbar {
     height: 58px;
 
-    border-bottom:
-        1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
 
     display: grid;
 
@@ -117,6 +117,87 @@ button {
 
 
 /* ==========================================
+   GAME INFO
+========================================== */
+
+.game-info {
+    min-height: 54px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    padding-top: 7px;
+}
+
+.game-mode {
+    font-size: 13px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    color: var(--muted);
+
+    text-align: center;
+}
+
+.timer {
+    font-size: 25px;
+
+    font-weight: 800;
+
+    line-height: 1;
+}
+
+.timer.hidden {
+    display: none;
+}
+
+.timer.warning {
+    font-weight: 900;
+}
+
+.black-letter-display {
+    font-size: 13px;
+
+    color: var(--muted);
+
+    font-weight: 700;
+}
+
+.black-letter-display strong {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-left: 4px;
+
+    width: 24px;
+    height: 24px;
+
+    background: var(--black);
+
+    color: white;
+
+    border-radius: 3px;
+
+    font-size: 14px;
+}
+
+.black-letter-display.hidden {
+    display: none;
+}
+
+
+/* ==========================================
    BOARD
 ========================================== */
 
@@ -124,7 +205,8 @@ button {
     width: min(350px, 88vw);
 
     margin:
-        18px auto
+        8px
+        auto
         12px;
 
     display: grid;
@@ -133,18 +215,20 @@ button {
         repeat(5, 1fr);
 
     gap: 5px;
+
+    transition:
+        height .25s ease;
 }
 
 .tile {
     aspect-ratio: 1;
 
-    border:
-        2px solid
-        var(--border);
+    border: 2px solid var(--border);
 
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     font-size:
@@ -161,18 +245,13 @@ button {
     user-select: none;
 
     transition:
-        opacity .2s,
-        transform .2s;
+        opacity .2s ease,
+        transform .2s ease;
 }
 
 .tile.filled {
     border-color: #878a8c;
 }
-
-
-/* ==========================================
-   NORMAL WORDLE COLORS
-========================================== */
 
 .tile.green,
 .tile.yellow,
@@ -180,57 +259,41 @@ button {
 .tile.black {
     color: #fff;
 
-    border-color:
-        transparent;
+    border-color: transparent;
 }
 
 .tile.green {
-    background:
-        var(--green);
+    background: var(--green);
 }
 
 .tile.yellow {
-    background:
-        var(--yellow);
+    background: var(--yellow);
 }
 
 .tile.gray {
-    background:
-        var(--gray);
+    background: var(--gray);
 }
-
-
-/* ==========================================
-   BLACK LETTER
-========================================== */
 
 .tile.black {
-    background:
-        var(--black-letter);
-
-    border-color:
-        var(--black-letter);
-
-    color: #fff;
+    background: var(--black);
 }
 
 
 /* ==========================================
-   REMOVED PENALTY ROW
+   GREEN ONLY MODE
 ========================================== */
 
-.tile.removed-row {
-    opacity: .18;
+.tile.hidden-letter {
+    color: transparent !important;
 
-    border-color:
-        #eeeeee;
+    background: transparent !important;
 
-    pointer-events: none;
+    border-color: transparent !important;
 }
 
 
 /* ==========================================
-   POP ANIMATION
+   ANIMATIONS
 ========================================== */
 
 @keyframes pop {
@@ -254,10 +317,6 @@ button {
         pop .12s ease-out;
 }
 
-
-/* ==========================================
-   FLIP ANIMATION
-========================================== */
 
 @keyframes flip {
 
@@ -289,11 +348,7 @@ button {
 ========================================== */
 
 .keyboard {
-    width:
-        min(
-            500px,
-            100%
-        );
+    width: min(500px, 100%);
 
     margin:
         auto
@@ -305,65 +360,42 @@ button {
         0
         4px;
 
-    display:
-        flex;
+    display: flex;
 
-    flex-direction:
-        column;
+    flex-direction: column;
 
     gap: 6px;
 
-    touch-action:
-        manipulation;
+    touch-action: manipulation;
 }
-
-
-/* ==========================================
-   KEYBOARD ROW
-========================================== */
 
 .keyboard-row {
     width: 100%;
 
-    display: grid;
+    display: flex;
 
-    grid-template-columns:
-        repeat(
-            10,
-            minmax(
-                0,
-                1fr
-            )
-        );
+    justify-content: center;
 
     gap: 6px;
-
-    align-items: stretch;
 }
 
-
-/* ==========================================
-   KEY
-========================================== */
-
 .key {
+    flex:
+        1
+        1
+        0;
+
     min-width: 0;
 
-    width: 100%;
-
     height: 54px;
-
-    padding: 0;
 
     border: 0;
 
     border-radius: 4px;
 
-    background:
-        var(--key);
+    background: var(--key);
 
-    color:
-        var(--text);
+    color: var(--text);
 
     font-size: 14px;
 
@@ -373,66 +405,44 @@ button {
 
     user-select: none;
 
-    touch-action:
-        manipulation;
+    touch-action: manipulation;
 
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
+    padding: 0 3px;
 }
 
 .key.wide {
-    grid-column:
-        span 2;
+    flex:
+        1.5
+        1.5
+        0;
 }
-
-
-/* ==========================================
-   KEYBOARD COLORS
-========================================== */
 
 .key.green,
 .key.yellow,
-.key.gray {
+.key.gray,
+.key.black {
     color: #fff;
 }
 
 .key.green {
-    background:
-        var(--green);
+    background: var(--green);
 }
 
 .key.yellow {
-    background:
-        var(--yellow);
+    background: var(--yellow);
 }
 
 .key.gray {
-    background:
-        var(--gray);
+    background: var(--gray);
 }
 
-
-/*
-    Black letter key.
-
-    This is optional visually, but useful
-    because the player can see which letter
-    is dangerous.
-*/
-
 .key.black {
-    background:
-        #000;
-
-    color:
-        #fff;
+    background: var(--black);
 }
 
 
 /* ==========================================
-   MESSAGE
+   GAME MESSAGE
 ========================================== */
 
 .game-message {
@@ -465,8 +475,7 @@ button {
             -10px
         );
 
-    background:
-        #1a1a1b;
+    background: #1a1a1b;
 
     color: white;
 
@@ -499,7 +508,7 @@ button {
 
 
 /* ==========================================
-   MODAL
+   MODALS
 ========================================== */
 
 .modal {
@@ -509,8 +518,7 @@ button {
 
     z-index: 30;
 
-    background:
-        var(--overlay);
+    background: var(--overlay);
 
     display: flex;
 
@@ -528,19 +536,13 @@ button {
 .modal-card {
     position: relative;
 
-    width:
-        min(
-            430px,
-            100%
-        );
+    width: min(430px, 100%);
 
-    max-height:
-        90dvh;
+    max-height: 90dvh;
 
     overflow: auto;
 
-    background:
-        white;
+    background: white;
 
     border-radius: 10px;
 
@@ -548,22 +550,12 @@ button {
 
     box-shadow:
         0 12px 40px
-        rgba(
-            0,
-            0,
-            0,
-            .2
-        );
+        rgba(0, 0, 0, .2);
 }
 
 .modal-card h2 {
     margin-top: 0;
 }
-
-
-/* ==========================================
-   CLOSE BUTTON
-========================================== */
 
 .close-btn {
     position: absolute;
@@ -583,7 +575,7 @@ button {
 
 
 /* ==========================================
-   HELP EXAMPLES
+   EXAMPLES
 ========================================== */
 
 .example {
@@ -603,7 +595,8 @@ button {
     height: 42px;
 
     flex:
-        0 0 42px;
+        0 0
+        42px;
 
     display: grid;
 
@@ -615,38 +608,31 @@ button {
 }
 
 .example-tile.green {
-    background:
-        var(--green);
+    background: var(--green);
 }
 
 .example-tile.yellow {
-    background:
-        var(--yellow);
+    background: var(--yellow);
 }
 
 .example-tile.gray {
-    background:
-        var(--gray);
+    background: var(--gray);
 }
 
 .example-tile.black {
-    background:
-        #000;
+    background: var(--black);
 }
 
 
 /* ==========================================
-   STATISTICS
+   STATS
 ========================================== */
 
 .stat-grid {
     display: grid;
 
     grid-template-columns:
-        repeat(
-            4,
-            1fr
-        );
+        repeat(4, 1fr);
 
     text-align: center;
 
@@ -667,14 +653,8 @@ button {
 .stat-grid span {
     font-size: 12px;
 
-    color:
-        var(--muted);
+    color: var(--muted);
 }
-
-
-/* ==========================================
-   DISTRIBUTION
-========================================== */
 
 .distribution {
     display: grid;
@@ -703,8 +683,7 @@ button {
         0
         7px;
 
-    background:
-        var(--gray);
+    background: var(--gray);
 
     color: white;
 
@@ -746,7 +725,7 @@ button {
                 88vw
             );
 
-        margin-top: 14px;
+        margin-top: 5px;
     }
 
     .keyboard {
@@ -762,13 +741,8 @@ button {
 
         font-size: 13px;
     }
-
 }
 
-
-/* ==========================================
-   VERY SMALL PHONES
-========================================== */
 
 @media (max-width: 360px) {
 
@@ -776,14 +750,14 @@ button {
         width: 94vw;
     }
 
-    .keyboard-row {
-        gap: 3px;
-    }
-
     .key {
         height: 48px;
 
         font-size: 12px;
+    }
+
+    .keyboard-row {
+        gap: 3px;
     }
 
 }
