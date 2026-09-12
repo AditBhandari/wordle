@@ -7,6 +7,7 @@
     --green: #6aaa64;
     --yellow: #c9b458;
     --gray: #787c7e;
+    --black: #111111;
 
     --surface: #ffffff;
     --overlay: rgba(0, 0, 0, .42);
@@ -23,9 +24,14 @@ body {
 
 body {
     margin: 0;
+
     background: var(--surface);
     color: var(--text);
-    font-family: Arial, Helvetica, sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
     -webkit-tap-highlight-color: transparent;
 
@@ -36,13 +42,9 @@ button {
     font: inherit;
 }
 
-
-/* ==========================================
-   APP
-========================================== */
-
 .app {
     width: min(100%, 560px);
+
     min-height: 100dvh;
 
     margin: 0 auto;
@@ -62,7 +64,7 @@ button {
 ========================================== */
 
 .topbar {
-    height: 58px;
+    min-height: 78px;
 
     border-bottom: 1px solid #e5e5e5;
 
@@ -78,16 +80,38 @@ button {
     flex: 0 0 auto;
 }
 
+.title-area {
+    text-align: center;
+}
+
 .topbar h1 {
     margin: 0;
 
-    text-align: center;
+    font-size: 24px;
 
-    font-size: 30px;
-
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
 
     font-weight: 800;
+}
+
+.game-mode {
+    margin-top: 3px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    color: var(--muted);
+}
+
+.game-description {
+    margin-top: 2px;
+
+    font-size: 11px;
+
+    color: var(--muted);
 }
 
 .icon-btn {
@@ -114,55 +138,27 @@ button {
 
 
 /* ==========================================
-   GAME INFORMATION
+   TIMER
 ========================================== */
 
-.game-info {
+.timer {
     width: 100%;
 
     text-align: center;
 
-    margin:
-        13px auto
-        0;
+    margin-top: 8px;
 
-    min-height: 52px;
-}
-
-.game-mode {
-    font-size: 17px;
+    font-size: 20px;
 
     font-weight: 800;
-
-    letter-spacing: 1px;
-
-    text-transform: uppercase;
-
-    margin-bottom: 4px;
 }
 
-.game-description {
-    color: var(--muted);
-
-    font-size: 13px;
-
-    line-height: 1.3;
-
-    min-height: 17px;
-}
-
-.timer {
-    margin-top: 5px;
-
-    font-size: 19px;
-
-    font-weight: 800;
-
-    min-height: 22px;
-}
-
-.timer:empty {
+.timer.hidden {
     display: none;
+}
+
+.timer.danger {
+    color: #d33;
 }
 
 
@@ -173,9 +169,7 @@ button {
 .board {
     width: min(350px, 88vw);
 
-    margin:
-        10px auto
-        12px;
+    margin: 18px auto 12px;
 
     display: grid;
 
@@ -183,8 +177,6 @@ button {
         repeat(5, 1fr);
 
     gap: 5px;
-
-    transition: all .2s ease;
 }
 
 .tile {
@@ -195,6 +187,7 @@ button {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     font-size:
@@ -209,10 +202,6 @@ button {
     text-transform: uppercase;
 
     user-select: none;
-
-    transition:
-        background-color .15s,
-        border-color .15s;
 }
 
 .tile.filled {
@@ -241,8 +230,7 @@ button {
 }
 
 .tile.black {
-    background: #000;
-    color: #fff;
+    background: var(--black);
 }
 
 
@@ -263,32 +251,34 @@ button {
     100% {
         transform: scale(1);
     }
-
 }
 
 .tile.pop {
-    animation: pop .12s ease-out;
+    animation:
+        pop .12s ease-out;
 }
-
 
 @keyframes flip {
 
     0% {
-        transform: rotateX(0);
+        transform:
+            rotateX(0);
     }
 
     50% {
-        transform: rotateX(90deg);
+        transform:
+            rotateX(90deg);
     }
 
     100% {
-        transform: rotateX(0);
+        transform:
+            rotateX(0);
     }
-
 }
 
 .tile.flip {
-    animation: flip .48s ease-in-out;
+    animation:
+        flip .48s ease-in-out;
 }
 
 
@@ -329,11 +319,9 @@ button {
 }
 
 .key {
-    flex: 1 1 0;
+    flex: 1;
 
     min-width: 0;
-
-    max-width: 43px;
 
     height: 54px;
 
@@ -357,19 +345,13 @@ button {
 }
 
 .key.wide {
-    flex:
-        1.5
-        1
-        0;
-
-    max-width: 65px;
-
-    font-size: 12px;
+    flex: 1.5;
 }
 
 .key.green,
 .key.yellow,
-.key.gray {
+.key.gray,
+.key.black {
     color: #fff;
 }
 
@@ -383,6 +365,10 @@ button {
 
 .key.gray {
     background: var(--gray);
+}
+
+.key.black {
+    background: var(--black);
 }
 
 
@@ -411,7 +397,6 @@ button {
     z-index: 20;
 
     left: 50%;
-
     top: 72px;
 
     transform:
@@ -424,9 +409,7 @@ button {
 
     color: white;
 
-    padding:
-        10px
-        14px;
+    padding: 10px 14px;
 
     border-radius: 5px;
 
@@ -502,20 +485,10 @@ button {
     margin-top: 0;
 }
 
-.modal-card h3 {
-    margin-top: 24px;
-    margin-bottom: 8px;
-}
-
-.modal-card p {
-    line-height: 1.45;
-}
-
 .close-btn {
     position: absolute;
 
     right: 12px;
-
     top: 8px;
 
     border: 0;
@@ -548,10 +521,7 @@ button {
     width: 42px;
     height: 42px;
 
-    flex:
-        0
-        0
-        42px;
+    flex: 0 0 42px;
 
     display: grid;
 
@@ -575,12 +545,12 @@ button {
 }
 
 .example-tile.black {
-    background: #000;
+    background: var(--black);
 }
 
 
 /* ==========================================
-   STATISTICS
+   STATS
 ========================================== */
 
 .stat-grid {
@@ -593,8 +563,7 @@ button {
 
     gap: 8px;
 
-    margin:
-        20px 0;
+    margin: 20px 0;
 }
 
 .stat-grid strong,
@@ -622,8 +591,7 @@ button {
     display: grid;
 
     grid-template-columns:
-        18px
-        1fr;
+        18px 1fr;
 
     gap: 5px;
 
@@ -635,9 +603,7 @@ button {
 
     height: 20px;
 
-    padding:
-        0
-        7px;
+    padding: 0 7px;
 
     background: var(--gray);
 
@@ -667,33 +633,29 @@ button {
     }
 
     .topbar {
-        height: 54px;
+        min-height: 72px;
     }
 
     .topbar h1 {
-        font-size: 26px;
-    }
-
-    .game-info {
-        margin-top: 11px;
+        font-size: 20px;
     }
 
     .game-mode {
-        font-size: 16px;
+        font-size: 10px;
     }
 
     .game-description {
-        font-size: 12px;
+        font-size: 10px;
     }
 
     .board {
         width: min(330px, 88vw);
 
-        margin-top: 8px;
+        margin-top: 14px;
     }
 
     .keyboard {
-        gap: 5px;
+        gap: 4px;
     }
 
     .keyboard-row {
@@ -704,10 +666,6 @@ button {
         height: 52px;
 
         font-size: 13px;
-    }
-
-    .key.wide {
-        font-size: 11px;
     }
 }
 
@@ -723,9 +681,4 @@ button {
 
         font-size: 12px;
     }
-
-    .key.wide {
-        font-size: 10px;
-    }
-
 }
