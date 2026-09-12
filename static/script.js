@@ -633,7 +633,7 @@ async function loadCurrentGame() {
             "COLOURBLIND";
 
         gameDescription.textContent =
-            "Yellow letters are hidden; green and gray work normally.";
+            "Yellow letters are hidden, green and gray work normally.";
 
         timerElement.textContent = "";
 
