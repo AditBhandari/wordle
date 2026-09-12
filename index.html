@@ -22,16 +22,11 @@
     >
 </head>
 
-
 <body>
 
     <main class="app">
 
-
-        <!-- ==========================================
-             TOP BAR
-        =========================================== -->
-
+        <!-- TOP BAR -->
         <header class="topbar">
 
             <button
@@ -42,11 +37,7 @@
                 ?
             </button>
 
-
-            <h1>
-                WORDLE: NO MERCY
-            </h1>
-
+            <h1>WORDLE: NO MERCY</h1>
 
             <button
                 class="icon-btn"
@@ -59,11 +50,7 @@
         </header>
 
 
-
-        <!-- ==========================================
-             TOAST
-        =========================================== -->
-
+        <!-- TOAST -->
         <div
             id="toast"
             class="toast"
@@ -72,34 +59,31 @@
         ></div>
 
 
+        <!-- GAME INFORMATION -->
+        <section
+            class="game-info"
+            aria-live="polite"
+        >
 
-        <!-- ==========================================
-             GAME MODE / MESSAGE
-        =========================================== -->
+            <div
+                class="game-mode"
+                id="gameMode"
+            ></div>
 
-        <div
-            class="game-mode"
-            id="gameMode"
-        ></div>
+            <div
+                class="game-description"
+                id="gameDescription"
+            ></div>
 
+            <div
+                class="timer"
+                id="timer"
+            ></div>
 
-
-        <!-- ==========================================
-             TIMER
-             Only used by Game 1
-        =========================================== -->
-
-        <div
-            class="timer"
-            id="timer"
-        ></div>
+        </section>
 
 
-
-        <!-- ==========================================
-             WORDLE BOARD
-        =========================================== -->
-
+        <!-- BOARD -->
         <section
             id="board"
             class="board"
@@ -107,11 +91,7 @@
         ></section>
 
 
-
-        <!-- ==========================================
-             KEYBOARD
-        =========================================== -->
-
+        <!-- KEYBOARD -->
         <section
             id="keyboard"
             class="keyboard"
@@ -119,26 +99,17 @@
         ></section>
 
 
-
-        <!-- ==========================================
-             GAME MESSAGE
-        =========================================== -->
-
+        <!-- GAME MESSAGE -->
         <div
             class="game-message"
             id="gameMessage"
             aria-live="polite"
         ></div>
 
-
     </main>
 
 
-
-    <!-- ==============================================
-         HELP MODAL
-    =============================================== -->
-
+    <!-- HELP MODAL -->
     <div
         class="modal hidden"
         id="helpModal"
@@ -157,194 +128,92 @@
                 ×
             </button>
 
-
             <h2 id="helpTitle">
                 How to play
             </h2>
 
-
             <p>
-                Guess the five-letter word in as few tries
-                as possible. But each game has a different
-                challenge.
+                Guess the five-letter word in six tries.
+                Each puzzle has a different challenge.
             </p>
 
 
-
-            <!-- ==========================================
-                 GAME 1
-            =========================================== -->
-
-            <h3>
-                Game 1 — Time Challenge
-            </h3>
+            <h3>Game 1 — Black Letter</h3>
 
             <p>
-                Find the word before the timer runs out.
-                The faster you solve it, the better.
+                One secret letter has been selected.
+                You will not be told which letter it is.
+                If you use it in a guess, you lose one
+                available guess.
+            </p>
+
+            <div class="example">
+                <span class="example-tile green">W</span>
+                <span>
+                    Green means the letter is correct
+                    and in the correct position.
+                </span>
+            </div>
+
+            <div class="example">
+                <span class="example-tile yellow">O</span>
+                <span>
+                    Yellow means the letter is in the
+                    word but in the wrong position.
+                </span>
+            </div>
+
+            <div class="example">
+                <span class="example-tile gray">R</span>
+                <span>
+                    Gray means the letter is not in
+                    the answer.
+                </span>
+            </div>
+
+            <p>
+                The black letter remains completely secret.
             </p>
 
 
-            <div class="example">
-
-                <span class="example-tile green">
-                    W
-                </span>
-
-                <span>
-                    W is in the word and in the correct spot.
-                </span>
-
-            </div>
-
-
-            <div class="example">
-
-                <span class="example-tile yellow">
-                    O
-                </span>
-
-                <span>
-                    O is in the word but in the wrong spot.
-                </span>
-
-            </div>
-
-
-            <div class="example">
-
-                <span class="example-tile gray">
-                    R
-                </span>
-
-                <span>
-                    R is not in the word.
-                </span>
-
-            </div>
-
-
-
-            <!-- ==========================================
-                 GAME 2
-            =========================================== -->
-
-            <h3>
-                Game 2 — Colourblind
-            </h3>
+            <h3>Game 2 — Time Challenge</h3>
 
             <p>
-                Yellow letters are hidden.
-                Green and gray letters work normally.
+                Solve the word before the timer runs out.
+                The normal Wordle rules apply.
             </p>
 
 
-            <div class="example">
-
-                <span class="example-tile green">
-                    W
-                </span>
-
-                <span>
-                    Green letters remain visible because
-                    they are in the correct position.
-                </span>
-
-            </div>
-
-
-            <div class="example">
-
-                <span class="example-tile gray">
-                    R
-                </span>
-
-                <span>
-                    Gray letters remain visible because
-                    they are not in the word.
-                </span>
-
-            </div>
-
+            <h3>Game 3 — Colourblind</h3>
 
             <p>
-                If a letter would normally be yellow,
-                it simply appears as a normal gray tile.
+                Green and gray letters work normally,
+                but yellow letters are shown as normal
+                gray tiles.
             </p>
 
-
-
-            <!-- ==========================================
-                 GAME 3
-            =========================================== -->
-
-            <h3>
-                Game 3 — Black Letter
-            </h3>
-
-            <p>
-                One secret letter is selected for the
-                puzzle. The letter is never revealed
-                on screen.
-            </p>
-
-
             <div class="example">
-
-                <span class="example-tile green">
-                    W
-                </span>
-
+                <span class="example-tile green">W</span>
                 <span>
-                    Normal Wordle rules still apply.
+                    Green letters remain visible.
                 </span>
-
             </div>
 
-
             <div class="example">
-
-                <span class="example-tile gray">
-                    R
-                </span>
-
+                <span class="example-tile gray">O</span>
                 <span>
-                    Normal gray letters work as usual.
+                    Yellow letters appear as normal gray
+                    tiles, so you cannot tell that they
+                    are in the word.
                 </span>
-
             </div>
-
-
-            <div class="example">
-
-                <span class="example-tile black">
-                    X
-                </span>
-
-                <span>
-                    The black letter is secret. If you
-                    enter it, you lose one available guess.
-                </span>
-
-            </div>
-
-
-            <p>
-                You will not be told which letter is black.
-                You have to figure it out yourself.
-            </p>
-
 
         </div>
 
     </div>
 
 
-
-    <!-- ==============================================
-         STATISTICS MODAL
-    =============================================== -->
-
+    <!-- STATISTICS MODAL -->
     <div
         class="modal hidden"
         id="statsModal"
@@ -363,84 +232,47 @@
                 ×
             </button>
 
-
             <h2 id="statsTitle">
                 Statistics
             </h2>
 
-
             <div class="stat-grid">
 
                 <div>
-                    <strong id="played">
-                        0
-                    </strong>
-
-                    <span>
-                        Played
-                    </span>
+                    <strong id="played">0</strong>
+                    <span>Played</span>
                 </div>
 
-
                 <div>
-                    <strong id="winRate">
-                        0
-                    </strong>
-
-                    <span>
-                        Win %
-                    </span>
+                    <strong id="winRate">0</strong>
+                    <span>Win %</span>
                 </div>
 
-
                 <div>
-                    <strong id="streak">
-                        0
-                    </strong>
-
-                    <span>
-                        Streak
-                    </span>
+                    <strong id="streak">0</strong>
+                    <span>Streak</span>
                 </div>
 
-
                 <div>
-                    <strong id="maxStreak">
-                        0
-                    </strong>
-
-                    <span>
-                        Best
-                    </span>
+                    <strong id="maxStreak">0</strong>
+                    <span>Best</span>
                 </div>
 
             </div>
 
-
-            <h3>
-                Guess distribution
-            </h3>
-
+            <h3>Guess distribution</h3>
 
             <div
                 id="distribution"
                 class="distribution"
             ></div>
 
-
         </div>
 
     </div>
 
 
-
-    <!-- ==============================================
-         JAVASCRIPT
-    =============================================== -->
-
-    <script
-        src="static/script.js"
-    ></script>
+    <script src="static/script.js"></script>
 
 </body>
 
